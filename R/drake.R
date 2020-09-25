@@ -7,8 +7,10 @@
 #' @examples purlActiveRmd_thenPlanMake()
 purlActiveRmd_thenPlanMake <- function(){
   require(dplyr)
-  rstudioapi::getSourceEditorContext() -> activeSource
-  activeSource$path -> activeRmd
+  # rstudioapi::getSourceEditorContext() -> activeSource
+  # activeSource$path -> activeRmd
+  extract_activeEditorFilename()
+  activeRmd <- .activeFile
   # normalizePath(activeRmd) -> activeRmd
   # stringr::str_remove(activeRmd, rootPath) ->
   #   html2open
@@ -367,7 +369,10 @@ source_functional <- function(path){
     )
   }
 }
-
+extract_activeEditorFilename <- function(){
+  activeSource <- rstudioapi::getSourceEditorContext()
+  .activeFile <<- activeSource$path
+}
 get_drakeBody = function(Rmdlines, oneSlice){
   require(dplyr)
   oneSlice %>%
