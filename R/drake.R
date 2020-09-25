@@ -46,6 +46,9 @@ purlActiveRmd_thenPlanMake <- function(){
 purl_drakePlan <- function(filename, plan_name){
   readLines(filename) -> Rmdlines
 
+  stringr::str_extract(
+    basename(filename),"[:graph:]+(?=\\.)") -> filetitle
+
   frontmatterParams={
     knitr::knit_params(Rmdlines) -> params
 
@@ -54,9 +57,13 @@ purl_drakePlan <- function(filename, plan_name){
     if(length(params)!=0){
       paramsList <- purrr::map(
         params,~purrr::pluck(.x, "value"))
-      saveRDS(paramsList, file="params.rds")
+
+      rdsName = glue::glue(
+        "params_{filetitle}.rds")
+      saveRDS(paramsList,
+              file=rdsName)
       paramsSetupString <-
-        "params=readRDS(\"params.rds\")"
+        glue::glue("params=readRDS(\"{rdsName}\")")
     } else {
       paramsSetupString="# no params in the frontmatter"
     }
