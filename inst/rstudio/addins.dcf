@@ -1,0 +1,5 @@
+Name: Rmd-plan-make
+Description: Turn activeRmd into drake plan
+Binding: purlActiveRmd_thenPlanMake
+Interactive: true
+
