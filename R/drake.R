@@ -11,6 +11,15 @@ purlActiveRmd_thenPlanMake <- function(){
   # activeSource$path -> activeRmd
   extract_activeEditorFilename()
   activeRmd <- .activeFile
+  yml <- rmarkdown::yaml_front_matter(activeRmd)
+  if(!exists("yml") || !("drake_cache" %in% names(yml))){
+    warning(
+      "Frontmatter has no drake_cache assigned.")
+    return()
+  }
+  generate_hiddenCacheNew(yml)
+  # cacheNew = drake::new_cache(path=yml$drake_cache)
+
   # normalizePath(activeRmd) -> activeRmd
   # stringr::str_remove(activeRmd, rootPath) ->
   #   html2open
@@ -203,11 +212,11 @@ purl_drakePlan <- function(filename, plan_name){
       "",
       # "mkEnv=rlang::current_env()",
       "library(drake)",
-      "make({plan_name}, cache=cacheNew)",
+      "make({plan_name}, cache=drake::drake_cache(path=\"{.cacheNew$path}\"))",
       "}",
       "",
       "vis_{plan_name} <- function(){",
-      "vis_drake_graph({plan_name}, cache = cacheNew)",
+      "vis_drake_graph({plan_name}, cache=drake::drake_cache(path=\"{.cacheNew$path}\"))",
       "}",
       ""
     )
@@ -235,8 +244,10 @@ purl_drakePlan <- function(filename, plan_name){
       stringr::str_extract(plan_name,
                            glue::glue("[:graph:]+(?={plan_nameExtract})"))
     )
+
   drakeScripts %>%
-    stringr::str_replace_all("\\{plan_name\\}", plan_name0) ->
+    stringr::str_replace_all("\\{plan_name\\}", plan_name0) %>%
+    stringr::str_replace_all("\\{.cacheNew\\$path\\}", .cacheNew$path)->
     drakeScriptsFinal
   writeLines(
     drakeScriptsFinal,
@@ -385,4 +396,20 @@ get_drakeBody = function(Rmdlines, oneSlice){
   targetBody[[whichTargetEnds]] %>%
     stringr::str_remove_all("\\s") -> targetBody[[whichTargetEnds]]
   targetBody
+}
+generate_hiddenCacheNew = function(yml){
+  ymlCachePath = yml$drake_cache
+  # if(basename(.cacheNew$path) == ymlCachePath){
+  #   # no need to create new cache
+  # } else {
+  #   .cacheNew <<-
+  #     drake::new_cache(path=yml$drake_cache)
+  # }
+  if(
+    !exists(".cacheNew") ||
+    basename(.cacheNew$path) != ymlCachePath
+  ) {
+    .cacheNew <<-
+      drake::new_cache(path=yml$drake_cache)
+  }
 }
