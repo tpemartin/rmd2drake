@@ -88,8 +88,8 @@ purl_drakePlan <- function(filename, plan_name){
     Rmdlines %>%
       stringr::str_which("(?<=```\\{r )[[:alnum:]_]+") -> whichHasRSetting
     Rmdlines[whichHasRSetting] %>%
-      stringr::str_remove_all("\\s") %>%
-      stringr::str_detect("(drake=F|setup)") -> pickDrakeF
+      stringr::str_trim(side="both") %>%
+      stringr::str_detect("(drake=F|\\bsetup\\b)") -> pickDrakeF
     whichHasRSetting[!pickDrakeF] -> whichHasDrakeObjects
     Rmdlines[whichHasDrakeObjects] %>%
       stringr::str_extract("(?<=```\\{r )[[:alnum:]_]+") -> drakeObjects
@@ -97,8 +97,8 @@ purl_drakePlan <- function(filename, plan_name){
 
   {
     Rmdlines[whichHasRSetting] %>%
-      stringr::str_remove_all("\\s") %>%
-      stringr::str_detect("setup") -> isSetup
+      stringr::str_trim(side = "both") %>%
+      stringr::str_detect("\\bsetup\\b") -> isSetup
     if(any(isSetup)){
       whichHasRSetting[isSetup] -> whichIsSetup
       setupLines <- c()
