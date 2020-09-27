@@ -205,19 +205,23 @@ purl_drakePlan <- function(filename, plan_name){
     )
     makePlan <- c(
       "# make plan -----------------",
-      "mk_{plan_name} = function(){",
+      "mk_{plan_name} = function(cachePath=\"{.cacheNew$path}\"){",
       frontmatterParams,
       "",
       makecondition,
       "",
       # "mkEnv=rlang::current_env()",
       "library(drake)",
-      "make({plan_name}, cache=drake::drake_cache(path=\"{.cacheNew$path}\"))",
+      "options(rstudio_drake_cache = storr::storr_rds(\"{.cacheNew$path}\"))",
+      "make({plan_name}, cache=drake::drake_cache(path=cachePath))",
       "}",
       "",
-      "vis_{plan_name} <- function(){",
-      "vis_drake_graph({plan_name}, cache=drake::drake_cache(path=\"{.cacheNew$path}\"))",
+      "vis_{plan_name} <- function(cachePath=\"{.cacheNew$path}\"){",
+      "vis_drake_graph({plan_name}, cache=drake::drake_cache(path=cachePath))",
       "}",
+      "meta_{plan_name}=",
+      "list(",
+      "cachePath=\"{.cacheNew$path}\")",
       ""
     )
 
