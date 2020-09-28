@@ -255,11 +255,15 @@ purl_drakePlan <- function(filename, plan_name){
     drakeScriptsFinal
   writeLines(
     drakeScriptsFinal,
-    con=paste0(
-      stringr::str_replace(plan_name,"\\.R",""),
-      ".R")
-  )
-
+    con=
+      file.path(
+        dirname(filename),
+        paste0(
+          stringr::str_replace(plan_name,"\\.R",""),
+          ".R"
+          )
+        )
+      )
   invisible(drakeScriptsFinal)
 
 }
@@ -387,6 +391,9 @@ source_functional <- function(path){
 extract_activeEditorFilename <- function(){
   activeSource <- rstudioapi::getSourceEditorContext()
   .activeFile <<- activeSource$path
+  if(activeSource$path==''){
+    warning("Target Rmd file hasn't been saved yet. No path to it will be found. Please save your Rmd and try again")
+  }
 }
 get_drakeBody = function(Rmdlines, oneSlice){
   require(dplyr)
