@@ -89,42 +89,43 @@ purl_drakePlan <- function(filename, plan_name){
       stringr::str_which("(?<=```\\{r )[[:alnum:]_]+") -> whichHasRSetting
     Rmdlines[whichHasRSetting] %>%
       stringr::str_trim(side="both") %>%
-      stringr::str_detect("(drake=F|\\bsetup\\b)") -> pickDrakeF
+      stringr::str_detect("(afterMake=T|drake=F|\\bsetup\\b)") -> pickDrakeF
     whichHasRSetting[!pickDrakeF] -> whichHasDrakeObjects
     Rmdlines[whichHasDrakeObjects] %>%
       stringr::str_extract("(?<=```\\{r )[[:alnum:]_]+") -> drakeObjects
   }
 
-  {
-    Rmdlines[whichHasRSetting] %>%
-      stringr::str_trim(side = "both") %>%
-      stringr::str_detect("\\bsetup\\b") -> isSetup
-    if(any(isSetup)){
-      whichHasRSetting[isSetup] -> whichIsSetup
-      setupLines <- c()
-      count=0; max_count=100;
-      isNotEnd=T
-      while(isNotEnd && count < max_count){
-        count=count+1
-
-        setupLines <-
-          c(setupLines,
-            Rmdlines[[whichIsSetup+count]])
-        isNotEnd <-
-          stringr::str_detect(
-            Rmdlines[[whichIsSetup+count+1]],
-            "^```",
-            negate = T
-          )
-      }
-      setupExpression <-
-        parse(
-          text=paste(setupLines, collapse = "\n")
-        )
-      eval(setupExpression, envir = .GlobalEnv)
-    }
-
-  }
+  # {
+  #   Rmdlines[whichHasRSetting] %>%
+  #     stringr::str_trim(side = "both") %>%
+  #     stringr::str_detect("\\bsetup\\b") -> isSetup
+  #   if(any(isSetup)){
+  #     whichHasRSetting[isSetup] -> whichIsSetup
+  #     setupLines <- c()
+  #     count=0; max_count=100;
+  #     isNotEnd=T
+  #     while(isNotEnd && count < max_count){
+  #       count=count+1
+  #
+  #       setupLines <-
+  #         c(setupLines,
+  #           Rmdlines[[whichIsSetup+count]])
+  #       isNotEnd <-
+  #         stringr::str_detect(
+  #           Rmdlines[[whichIsSetup+count+1]],
+  #           "^```",
+  #           negate = T
+  #         )
+  #     }
+  #     setupExpression <-
+  #       parse(
+  #         text=paste(setupLines, collapse = "\n")
+  #       )
+  #
+  #     eval(setupExpression, envir = .GlobalEnv)
+  #   }
+  #
+  # }
   # define drake block begins and ends
   {
     whichDrakeLineEnds <- vector("integer", length(whichHasDrakeObjects))
@@ -190,6 +191,13 @@ purl_drakePlan <- function(filename, plan_name){
     }
 
   }
+  # afterMake=t
+  {
+    Rmdlines %>% find_afterMake() ->
+      whichHasAfterMake
+    whichHasAfterMake %>%
+      extract_codeChunksFromTheirStartingTicks(Rmdlines, .) -> afterMakeCodes
+  }
 
   # produce drake R script
   {
@@ -214,6 +222,7 @@ purl_drakePlan <- function(filename, plan_name){
       "library(drake)",
       "options(rstudio_drake_cache = storr::storr_rds(\"{.cacheNew$path}\"))",
       "make({plan_name}, cache=drake::drake_cache(path=cachePath))",
+      afterMakeCodes,
       "}",
       "",
       "vis_{plan_name} <- function(cachePath=\"{.cacheNew$path}\"){",
@@ -423,4 +432,52 @@ generate_hiddenCacheNew = function(yml){
     .cacheNew <<-
       drake::new_cache(path=yml$drake_cache)
   }
+}
+find_afterMake <- function(Rmdlines){
+  require(dplyr)
+  Rmdlines %>%
+    stringr::str_which("(?<=```\\{r )[[:alnum:]_]+") -> whichHasRSetting
+  Rmdlines[whichHasRSetting] %>%
+    stringr::str_trim(side="both") %>%
+    stringr::str_detect("afterMake=T") -> pickAfterMake
+  whichHasRSetting[pickAfterMake] -> whichHasAfterMakes
+  whichHasAfterMakes
+}
+
+extract_codeChunksFromTheirStartingTicks <- function(RmdLines, startingTickPositions){
+  allChunks <- c()
+  for(.x in seq_along(startingTickPositions)){
+    newChunk <- get_aChunk(RmdLines, startingTickPositions[[.x]])
+    allChunks <- c(
+      allChunks,
+      newChunk
+    )
+
+  }
+  allChunks
+}
+
+get_aChunk <- function(RmdLines, start){
+  require(dplyr)
+  RmdLines[[start]] %>%
+    stringr::str_replace("^```","###") ->
+    chunk
+  count=1; max_count=100; isNotEnd=T;
+  while(isNotEnd && count <= max_count){
+    newLine <-
+      RmdLines[[start+count]]
+    isNotEnd <-
+      stringr::str_detect(newLine,
+                          "^```", negate = T)
+    newLine = ifelse(isNotEnd,
+           newLine,
+           newLine %>%
+             stringr::str_replace("^```","###"))
+    chunk <- c(
+      chunk,
+      newLine
+    )
+    count=count+1
+  }
+  chunk
 }
