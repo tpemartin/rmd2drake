@@ -3,8 +3,16 @@ Description: Turn activeRmd into drake plan
 Binding: purlActiveRmd_thenPlanMake
 Interactive: true
 
+
+Name: Visualize active plan
+Description: New Addin Description
+Binding: visActiveRmd_plan
+Interactive: true
+
+
 Name: Get .activeFile
 Description: New Addin Description
 Binding: extract_activeEditorFilename
 Interactive: true
+
 

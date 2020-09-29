@@ -42,6 +42,35 @@ purlActiveRmd_thenPlanMake <- function(){
 
 }
 
+###
+#' visualize active Rmd's "plan_{activeRmdName}"
+#'
+#' @return
+#' @export
+#'
+#' @examples purlActiveRmd_thenPlanMake()
+visActiveRmd_plan <- function(){
+  require(dplyr)
+  require(drake)
+  # rstudioapi::getSourceEditorContext() -> activeSource
+  # activeSource$path -> activeRmd
+  extract_activeEditorFilename()
+  activeRmd <- .activeFile
+  activeRmd %>%
+    basename() %>%
+    stringr::str_remove(".[a-zA-Z]+$") %>%
+    paste0("vis_plan_",.) -> visPlanName
+
+  if(!exists(visPlanName)){
+    purlActiveRmd_thenPlanMake()
+  }
+
+  visPlanName %>%
+    call() %>%
+    eval()
+
+}
+
 #' Purl Rmd to a drake plan R script
 #'
 #' @description All R chunks with chunk names without drake=F will be purled to
@@ -220,17 +249,24 @@ purl_drakePlan <- function(filename, plan_name){
       "",
       # "mkEnv=rlang::current_env()",
       "library(drake)",
-      "options(rstudio_drake_cache = storr::storr_rds(\"{.cacheNew$path}\"))",
+      "options(rstudio_drake_cache = storr::storr_rds(\"{.cacheNew$path}\", hash_algorithm = \"xxhash64\"))",
       "make({plan_name}, cache=drake::drake_cache(path=cachePath))",
       afterMakeCodes,
       "}",
       "",
       "vis_{plan_name} <- function(cachePath=\"{.cacheNew$path}\"){",
-      "vis_drake_graph({plan_name}, cache=drake::drake_cache(path=cachePath))",
+      frontmatterParams,
+      "",
+      makecondition,
+      "drake::vis_drake_graph({plan_name}, cache=drake::drake_cache(path=cachePath))",
       "}",
       "meta_{plan_name}=",
       "list(",
-      "cachePath=\"{.cacheNew$path}\")",
+      "cachePath=\"{.cacheNew$path}\",",
+      "readd=function(t) {
+  drake::readd(t,cache=drake::drake_cache(path=\"{.cacheNew$path}\"))},",
+      "clean=function(t=NULL) {
+  drake::clean(t,cache=drake::drake_cache(path=\"{.cacheNew$path}\"))})",
       ""
     )
 
