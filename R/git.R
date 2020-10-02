@@ -4,7 +4,7 @@
 #' @export
 #'
 #' @examples none
-set_gitignore <- function(){
+set_gitignore <- function(...){
   library(gitignore); library(dplyr); library(stringr)
   gi_fetch_templates("R") -> Rtemplate
 
@@ -19,7 +19,7 @@ set_gitignore <- function(){
     newLines[[1]][pickNonComment & pickNonEmpty] -> ignorePattern
 
     # mac .DS_Store
-    ignorePattern <- c(ignorePattern,".DS_Store","**/.DS_Store")
+    ignorePattern <- c(ignorePattern,".DS_Store","**/.DS_Store",...)
     # newLines %>% View()
 
     command2RemoveFile <- 'git rm --cached {file}'
@@ -37,7 +37,7 @@ set_gitignore <- function(){
     }
     }
 
-  paste0(Rtemplate, c(".DS_Store","**/.DS_Store"), collapse = "\n")  %>%
+  paste0(Rtemplate, c(".DS_Store","**/.DS_Store",...), collapse = "\n")  %>%
   gi_write_gitignore()
 
 

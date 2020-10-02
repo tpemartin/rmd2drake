@@ -15,6 +15,9 @@ memberGmails: 為組員進入google classroom的gmail
 knitr::opts_chunk$set(echo = TRUE, eval=F)
 library(rmd2drake)
 library(drake)
+
+# If you use git and does not want to track cache folder, put down the following command:
+# set_gitignore(".myCache")
 ```
 
 ## makecondition
