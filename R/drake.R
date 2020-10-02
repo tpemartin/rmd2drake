@@ -198,7 +198,11 @@ purl_drakePlan <- function(filename, plan_name){
         makecondition <- oneSliceBody
         next
       }
-      oneSliceBody %>% length() -> lastWhich
+      oneSliceBody %>%
+        stringr::str_which("^#", negate=T) -> whichAreCommands # not comment
+      oneSliceBody[whichAreCommands] -> oneSliceBody
+      oneSliceBody %>%
+        length() -> lastWhich
       oneSliceBody[[lastWhich]] =
         ifelse(
           .x!=nDrakeObjs,
