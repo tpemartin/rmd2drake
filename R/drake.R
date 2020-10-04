@@ -129,38 +129,7 @@ purl_drakePlan <- function(filename, plan_name){
       stringr::str_extract("(?<=```\\{r )[[:alnum:]_]+") -> drakeObjects
   }
 
-  # {
-  #   Rmdlines[whichHasRSetting] %>%
-  #     stringr::str_trim(side = "both") %>%
-  #     stringr::str_detect("\\bsetup\\b") -> isSetup
-  #   if(any(isSetup)){
-  #     whichHasRSetting[isSetup] -> whichIsSetup
-  #     setupLines <- c()
-  #     count=0; max_count=100;
-  #     isNotEnd=T
-  #     while(isNotEnd && count < max_count){
-  #       count=count+1
-  #
-  #       setupLines <-
-  #         c(setupLines,
-  #           Rmdlines[[whichIsSetup+count]])
-  #       isNotEnd <-
-  #         stringr::str_detect(
-  #           Rmdlines[[whichIsSetup+count+1]],
-  #           "^```",
-  #           negate = T
-  #         )
-  #     }
-  #     setupExpression <-
-  #       parse(
-  #         text=paste(setupLines, collapse = "\n")
-  #       )
-  #
-  #     eval(setupExpression, envir = .GlobalEnv)
-  #   }
-  #
-  # }
-  # define drake block begins and ends
+
   {
     whichDrakeLineEnds <- vector("integer", length(whichHasDrakeObjects))
     for(.x in seq_along(whichHasDrakeObjects)){
@@ -526,3 +495,18 @@ get_aChunk <- function(RmdLines, start){
   }
   chunk
 }
+
+get_planname= function(planfilename){
+  planname = basename(planfilename)
+  fileExtension = getExtension(planname)
+  planname %>%
+    stringr::str_extract(
+      glue::glue("[:graph:]+(?=\\.{fileExtension}$)")) ->
+    planname
+  paste0("plan_", planname)
+}
+getExtension <- function(file){
+  ex <- strsplit(basename(file), split="\\.")[[1]]
+  return(ex[-1])
+}
+

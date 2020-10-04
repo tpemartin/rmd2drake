@@ -1,0 +1,190 @@
+---
+title: "Flexible framework constructor"
+author: "Don't knit. Just Run."
+date: "2020"
+drake_cache: ".login"
+drake_subplans: ["sub/googleLogin.Rmd"]
+---
+
+## Action 
+
+```{r setup, eval=F, include=FALSE, drake=F}
+knitr::opts_chunk$set(echo = T, eval=F)
+library(htmltools); library(rlang)
+library(dplyr)
+library(drake)
+
+rprojroot::is_rstudio_project -> pj
+pj$make_fix_file() -> root
+ws = webtemplate::webService() # build ws as a promise
+ws$serveTheLastModified(useLocalhost = T)
+```
+
+## Drake makecondition
+
+放你程式碼所需套件
+
+```{r makecondition}
+library(htmltools); library(rlang)
+library(dplyr); library(webtemplate)
+
+rmd2drake:::extract_activeEditorFilename()
+# setwd(dirname(.activeFile))
+setwd(dirname("/Users/martinl/Documents/GitHub/rmd2drake/inst/rmarkdown/templates/rmd-with-subplans/skeleton/login.Rmd"))
+title = "Programming for Data Science"
+emajorIconUrl = "img/emajor_logo.jpg"
+```
+
+## 選擇網頁架構
+
+```{r myChoice}
+myChoice = {
+  menu <- get_menu()
+  myChoice <- list(
+    menu$materialize(),
+    menu$jQuery(),
+    menu$googleLogin()
+  )
+  myChoice
+}
+```
+
+## login Card
+
+```{r loginCard}
+loginCard = {
+  div(
+    class="row",
+    div(
+      class="col s4 offset-s4",
+{
+  div(
+    class = "card blue-grey darken-1",
+    {
+      div(
+        class = "card-content white-text",
+        span(
+          class = "card-title",
+          "資料科學程式設計（一）"
+        ),
+        div(
+          class="divider"
+        ),
+        div(
+          class="section",
+          p(
+          "請使用Google classroom之gmail登入"
+          )
+        ),
+        div(
+          class="section",
+          withinbodyHtml
+        )
+      )
+    }
+  )
+}
+    )
+  )
+}
+```
+
+
+```{r withinbodyHtml}
+withinbodyHtml={
+  # google login
+  webtemplate::extract_withinbodyHtml(reviseMyChoice) }
+```
+
+## 產生網頁
+
+```{r outputWeblayout}
+outputWeblayout = {
+  bodyLayout <- generate_template(
+    reviseMyChoice,
+    .body=tagList(loginCard) #bodyTaglist
+  )
+  save_html(bodyLayout, file=file_out("login.html"))
+}
+```
+
+## helpers
+
+```{r insert_navbar}
+insert_navbar = function(listOfLiContents){
+  build_liGroup(listOfLiContents) -> liContent
+  htmlVerbose = glue::glue(
+  '<nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo right">Logo</a>
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+    {liContent}
+        </ul>
+      </div>
+    </nav>')
+  htmltools::htmlTemplate(text_=htmlVerbose)
+}
+
+```
+
+## Google login Setup
+
+```{r revise4googlelogin, afterMake=T}
+revise4googlelogin = {
+  # outputWeblayout
+  readLines("login.html") -> allLines
+  stringr::str_replace(allLines,
+                       "YOUR_CLIENT_ID.apps.googleusercontent.com",                       "808460346772-29ro7jm166d57n6epv2bis3odvao1vpd.apps.googleusercontent.com") -> allLines
+  writeLines(allLines, "login.html")
+  }
+```
+
+```{r}
+clean("revise4googlelogin")
+drake_config(plan_login, cache = drake_cache(path=meta_plan_login$cachePath))
+mk_plan_login()
+```
+
+```{r}
+source1=file.path(
+  root(),"googleAfterbodyHtml.html"
+)
+```
+
+```{r googleAfterbodyHtmlFix}
+googleAfterbodyHtmlFix <- "<script>
+    var user;
+    function onSuccess(googleUser) {
+       user=googleUser;
+      console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+      window.localStorage.setItem(\"googleUserId\",Ca);
+      window.localStorage.setItem(\"user\",user)
+    }
+    function onFailure(error) {
+      console.log(error);
+    }
+    function renderButton() {
+      gapi.signin2.render('my-signin2', {
+        'scope': 'profile email',
+        'width': 240,
+        'height': 50,
+        'longtitle': true,
+        'theme': 'dark',
+        'onsuccess': onSuccess,
+        'onfailure': onFailure
+      });
+    }
+  </script>
+
+  <script src=\"https://apis.google.com/js/platform.js?onload=renderButton\" async defer></script>"
+```
+
+```{r reviseMyChoice}
+reviseMyChoice = {
+  readr::read_file(file_in("googleAfterbodyHtml.html")) ->
+    myChoice[[3]]$afterbodyHtml
+  myChoice
+}
+
+```
+

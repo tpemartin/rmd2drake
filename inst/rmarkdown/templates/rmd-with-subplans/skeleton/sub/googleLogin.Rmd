@@ -1,0 +1,85 @@
+---
+title: "google login"
+drake_cache: ".googleLogin"
+params:
+  clientId: "clientId"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval=F)
+library(rmd2drake)
+library(drake)
+
+# If you use git and does not want to track cache folder, put down the following command:
+# set_gitignore(".myCache")
+```
+
+## makecondition
+
+```{r makecondition}
+library(readr)
+library(dplyr)
+library(htmltools); library(rlang)
+library(webtemplate)
+library(glue)
+rprojroot::is_rstudio_project -> pj
+pj$make_fix_file() -> root
+
+jsPath = file.path(root(),"js/onSignIn.js")
+htmlPath = file.path(root(),"html/signOut.html")
+
+```
+
+## Platform Library
+
+```{r platformJs}
+platformJs = {
+  htmltools::htmlDependency(
+  name="google api",
+  version = "v0",
+  src=c(href="https://apis.google.com"),
+  script="js/platform.js",
+  meta = list(
+    name=tags$meta(
+      name="google-signin-client-_id",
+      content=params$clientId
+      )
+    )
+  ) -> platformJS
+  htmltools::tagAppendAttributes(platformJS, "async defer")
+  }
+```
+
+## Sign-In button
+
+```{r signinBtn}
+signinBtn = {
+  div(
+    class="g-signin2",
+    `data-onsuccess`="onSignIn"
+  )
+}
+```
+
+## SignIn callback
+
+```{r signInJs}
+signInJs = {
+  
+  tagExpr = rlang::expr(htmltools::includeScript(file_in(!!jsPath)))
+
+  rlang::eval_tidy(tagExpr)
+}
+  
+```
+
+## SignOut 
+
+```{r signOutHtml}
+signOutHtml = {
+  tagExpr = rlang::expr(htmltools::includeHTML(file_in(!!htmlPath)))
+
+  rlang::eval_tidy(tagExpr)
+}
+```
+
