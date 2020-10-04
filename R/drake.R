@@ -98,6 +98,11 @@ purl_drakePlan <- function(filename, plan_name){
       paramsList <- purrr::map(
         params,~purrr::pluck(.x, "value"))
 
+      paramNames <-purrr::map_chr(
+        params,~purrr::pluck(.x, "name"))
+
+      names(paramsList) <- paramNames
+
       rdsName = glue::glue(
         "params_{filetitle}.rds")
       saveRDS(paramsList,
@@ -302,7 +307,7 @@ purl_drakePlan <- function(filename, plan_name){
     stringr::str_replace_all("\\{plan_name\\}", plan_name0) %>%
     stringr::str_replace_all("\\{.cacheNew\\$path\\}", .cacheNew$path)->
     drakeScriptsFinal
-  writeLines(
+  xfun::write_utf8(
     drakeScriptsFinal,
     con=
       file.path(
@@ -359,7 +364,7 @@ create_planRmd <- function(planname, title=NULL, root=NULL){
                  )))
     ) -> myRmdLines
 
-  writeLines(
+  xfun::write_utf8(
     myRmdLines,
     paste0(planname,".Rmd")
   )

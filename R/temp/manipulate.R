@@ -11,7 +11,7 @@ purlActiveMainRmd_thenPlanMake <- function(){
     stop(
       "Frontmatter has no drake_cache assigned.")
   }
-  if(!exists("yml") || !("drake_child" %in% names(yml))){
+  if(!exists("yml") || !("drake_subplans" %in% names(yml))){
     stop(
       "Frontmatter has no drake child Rmds assigned.
       Maybe you should use purlActiveRmd_thenPlanMake")
@@ -24,10 +24,37 @@ purlActiveMainRmd_thenPlanMake <- function(){
   #   html2open
   webDirRoot <- dirname(activeRmd)
   activeRmdBase <- basename(activeRmd)
-  drakePlanname <-
+  xfun::read_utf8(
+    activeRmd
+  ) -> RmdLines
+  get_frontmatterList(RmdLines) -> frontmatter
+  drakeMainPlanname <-
     paste0("plan_",
            stringr::str_remove(activeRmdBase,"\\.[rR][mM][dD]$"))
-  purl_drakePlan(activeRmd, drakePlanname)
+
+  ## build scripts of main and sub plans
+  mainPlan=
+    purl_drakeSubplanOnly(activeRmd, drakeMainPlanname)
+  subplans = vector("list", length(frontmatter$drake_subplans))
+  for(.x in seq_along(frontmatter$drake_subplans)){
+    # .x <-1
+    subplanfilename <- frontmatter$drake_subplans[[.x]]
+    subplanfilename <- file.path(
+      webDirRoot,
+      frontmatter$drake_subplans[[.x]]
+    )
+    subplans[[.x]] <-
+      purl_drakeSubplanOnly(subplanfilename, frontmatter$drake_cache)
+  }
+
+  append(
+    list(mainPlan),
+    subplans) -> allPlans
+
+  ######
+  make(plan_login, cache=drake::drake_cache(path=cachePath))
+
+
   drakefilename <-
     file.path(
       webDirRoot,paste0(drakePlanname,".R")
@@ -207,6 +234,14 @@ purl_drakePlanOnly <- function(filename, plan_name){
   plan_nameExtract=stringr::str_replace(plan_nameExtract,"\\.R","")
   plan_name0=ifelse(is.na(plan_nameExtract), plan_name, plan_nameExtract)
   plan_name0=stringr::str_replace(plan_name0,".R","")
+
+  browser()
+  # a patch to fix .cacheNew$path not exist
+  frontmatterList <- get_frontmatterList(Rmdlines)
+  .cacheNew <- list(
+    path = frontmatterList$drake_cache
+  )
+
   planfilepath=
     ifelse(
       is.na(plan_nameExtract),
@@ -219,7 +254,7 @@ purl_drakePlanOnly <- function(filename, plan_name){
     stringr::str_replace_all("\\{plan_name\\}", plan_name0) %>%
     stringr::str_replace_all("\\{.cacheNew\\$path\\}", .cacheNew$path)->
     drakeScriptsFinal
-  writeLines(
+  xfun::write_utf8(
     drakeScriptsFinal,
     con=
       file.path(
