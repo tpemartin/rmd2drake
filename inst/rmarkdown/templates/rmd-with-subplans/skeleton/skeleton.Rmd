@@ -29,8 +29,8 @@ library(htmltools); library(rlang)
 library(dplyr); library(webtemplate)
 
 rmd2drake:::extract_activeEditorFilename()
-# setwd(dirname(.activeFile))
-setwd(dirname("/Users/martinl/Documents/GitHub/rmd2drake/inst/rmarkdown/templates/rmd-with-subplans/skeleton/login.Rmd"))
+#setwd(dirname(.activeFile))
+
 title = "Programming for Data Science"
 emajorIconUrl = "img/emajor_logo.jpg"
 ```

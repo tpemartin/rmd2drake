@@ -3,6 +3,8 @@ title: "google login"
 drake_cache: ".googleLogin"
 params:
   clientId: "clientId"
+  jsPath: "js/onSignIn.js"
+  htmlPath: "html/signOut.html"
 ---
 
 ```{r setup, include=FALSE}
@@ -22,11 +24,9 @@ library(dplyr)
 library(htmltools); library(rlang)
 library(webtemplate)
 library(glue)
-rprojroot::is_rstudio_project -> pj
-pj$make_fix_file() -> root
-
-jsPath = file.path(root(),"js/onSignIn.js")
-htmlPath = file.path(root(),"html/signOut.html")
+rmd2drake:::extract_activeEditorFilename()
+# jsPath = file.path(.activeFile,"js/onSignIn.js")
+# htmlPath = file.path(.activeFile,"html/signOut.html")
 
 ```
 
@@ -66,7 +66,7 @@ signinBtn = {
 ```{r signInJs}
 signInJs = {
   
-  tagExpr = rlang::expr(htmltools::includeScript(file_in(!!jsPath)))
+  tagExpr = rlang::expr(htmltools::includeScript(file_in(!!(params$jsPath))))
 
   rlang::eval_tidy(tagExpr)
 }
@@ -77,7 +77,8 @@ signInJs = {
 
 ```{r signOutHtml}
 signOutHtml = {
-  tagExpr = rlang::expr(htmltools::includeHTML(file_in(!!htmlPath)))
+  
+  tagExpr = rlang::expr(htmltools::includeHTML(file_in(!!params$htmlPath)))
 
   rlang::eval_tidy(tagExpr)
 }

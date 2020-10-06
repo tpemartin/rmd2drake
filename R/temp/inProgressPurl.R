@@ -1,4 +1,4 @@
-purl_drakeSubplanOnly2 <- function(planDetails){
+# purl_drakeSubplanOnly2 <- function(planDetails){
 
   # find drake information
   {

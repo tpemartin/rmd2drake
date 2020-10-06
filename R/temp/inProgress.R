@@ -14,8 +14,10 @@ purlActiveMainRmd_thenPlanMake <- function(){
       #  for extra makecondition
       makeup_frontmatter() %>%
       ## build scripts of main and sub plans
-      purl_drakeSubplanOnly2()
-  }
+      purl_drakeSubplanOnly2() %>%
+      # augment makeconditions
+      augment_makecondition()
+    }
 
 
 # subplans ----------------------------------------------------------------
@@ -31,10 +33,65 @@ purlActiveMainRmd_thenPlanMake <- function(){
           #  for extra makecondition
           makeup_frontmatter() %>%
           ## build scripts of main and sub plans
-          purl_drakeSubplanOnly2()
+          purl_drakeSubplanOnly2() %>%
+        # augment makeconditions
+        augment_makecondition()
       }
 
   }
+
+# grandplan
+
+## stack augmented makeconditions
+  require(purrr)
+  list(mainplanDetails$augmentedMakeconditions) %>%
+    append(
+      subplans %>% map(~.x$augmentedMakeconditions)
+    ) %>%
+    unlist() -> stackedAugmentedMakeconditions
+
+  ## rename all subplan targets
+  subplans[[1]]$makeText = glue::glue("drake::make({subplans[[1]]$planname},
+                  cache=drake::drake_cache(
+                    path=\"{subplans[[1]]$frontmatter$drake_cache}\"))")
+  subplans[[1]]$makefunctionText =
+    c(
+      glue::glue("mk_")+subplans[[1]]$planname+
+        "= function()",
+      "{",
+      subplans[[1]]$augmentedMakeconditions,
+      subplans[[1]]$makeText,
+      "}"
+    )
+
+  subplans[[1]]$visText=
+    glue::glue("drake::vis_drake_graph({subplans[[1]]$planname},
+                  cache=drake::drake_cache(
+                    path=\"{subplans[[1]]$frontmatter$drake_cache}\"))")
+  subplans[[1]]$visfunctionText=
+    c(
+      glue::glue("vis_")+subplans[[1]]$planname+
+        "= function()",
+      "{",
+      subplans[[1]]$augmentedMakeconditions,
+      subplans[[1]]$visText,
+      "}"
+    )
+
+  subplans[[1]]$planScript =
+    c(
+      subplans[[1]]$drakePlanScript,
+      subplans[[1]]$augmentedMakeconditions,
+      subplans[[1]]$makefunctionText,
+      subplans[[1]]$visfunctionText
+    )
+
+
+  xfun::write_utf8(subplans[[1]]$planScript, con="subplan.R")
+
+
+
+  eval(makeContent)
 
   append(
     list(mainPlan),
@@ -45,7 +102,7 @@ purlActiveMainRmd_thenPlanMake <- function(){
     purrr::map(~.x$makecondition) %>%
     purrr::flatten() %>%
     unlist() -> stackedMakecondition
-
+#####
   # rename all subplan targets and stack
   allPlans[-1] %>%
     purrr::map(
