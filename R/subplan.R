@@ -959,3 +959,102 @@ purl_drakeSubplanOnly2 <- function(planDetails){
   )
 
 }
+
+augment_planScript_make_vis_components <- function(planDetails){
+  planDetails$makeText = glue::glue("drake::make({planDetails$planname},
+                  cache=drake::drake_cache(
+                    path=\"{planDetails$frontmatter$drake_cache}\"))")
+  planDetails$makefunctionText =
+    c(
+      glue::glue("mk_")+planDetails$planname+
+        "= function()",
+      "{",
+      planDetails$augmentedMakeconditions,
+      planDetails$makeText,
+      "}"
+    )
+
+  planDetails$visText=
+    glue::glue("drake::vis_drake_graph({planDetails$planname},
+                  cache=drake::drake_cache(
+                    path=\"{planDetails$frontmatter$drake_cache}\"))")
+  planDetails$visfunctionText=
+    c(
+      glue::glue("vis_")+planDetails$planname+
+        "= function()",
+      "{",
+      planDetails$augmentedMakeconditions,
+      planDetails$visText,
+      "}"
+    )
+
+  planDetails$completePlanMkVisScript =
+    c(
+      planDetails$augmentedMakeconditions,
+      planDetails$drakePlanScript,
+      planDetails$makefunctionText,
+      planDetails$visfunctionText
+    )
+  planDetails
+}
+
+generate_grandplan <- function(mainplanDetails, subplans){
+  require(purrr)
+  require(dplyr)
+  allPlannames <-
+    c(mainplanDetails$planname,
+      {
+        subplans %>% map_chr(~.x$planname)
+      }
+    )
+
+  allPlannames %>%
+    map(as.symbol) -> allPlanSymbols
+
+  bind_rowExpr <- rlang::expr(bind_rows(!!!allPlanSymbols))
+
+  grandplanBind_rowText <- glue::glue("grandplan")+
+    "<- "+rlang::expr_text(bind_rowExpr)
+
+  eval(
+    parse(text=as.character(grandplanBind_rowText)),
+    envir = .GlobalEnv)
+
+  invisible(grandplanBind_rowText)
+}
+get_grandDrakePlanScript <- function(grand_plan, mainplanname){
+  maxrow <- nrow(grand_plan)
+  grand_planContent <- vector("character", maxrow)
+  for(.x in 1:maxrow){
+    endtext = ifelse(.x==maxrow, "",",")
+    grand_planContent[[.x]] <-
+      paste0(
+        grand_plan$target[[.x]]," = ",
+        rlang::expr_text(grand_plan$command[[.x]]), endtext
+      )
+  }
+  grand_planScript <- c(
+    glue::glue("grand")+mainplanname+" = drake::drake_plan(",
+    grand_planContent,
+    ")"
+  )
+  grand_planScript
+}
+build_grandplanDetails <- function(grand_planScript, mainplanDetails, subplans) {
+  list(
+    planname = glue::glue("grandplan_") + mainplanDetails$filetitle,
+    frontmatter = list(
+      drake_cache = mainplanDetails$frontmatter$drake_cache
+    ),
+    augmentedMakeconditions = unique(c(
+      mainplanDetails$augmentedMakeconditions,
+      {
+        subplans %>%
+          map(~ .x$augmentedMakeconditions) %>%
+          unlist()
+      }
+    )),
+    drakePlanScript = grand_planScript,
+    root=mainplanDetails$root
+  )
+}

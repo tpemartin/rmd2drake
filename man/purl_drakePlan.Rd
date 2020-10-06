@@ -4,7 +4,7 @@
 \alias{purl_drakePlan}
 \title{Purl Rmd to a drake plan R script}
 \usage{
-purl_drakePlan(filename, plan_name)
+purl_drakePlan(filename, plan_name, activePath = ".")
 }
 \arguments{
 \item{filename}{A character defines the file path name of Rmd}
