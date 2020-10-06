@@ -11,6 +11,7 @@ purlActiveRmd_thenPlanMake <- function(){
   # activeSource$path -> activeRmd
   extract_activeEditorFilename()
   activeRmd <- .activeFile
+  activePath <- dirname(activeRmd)
   yml <- rmarkdown::yaml_front_matter(activeRmd)
   if(!exists("yml") || !("drake_cache" %in% names(yml))){
     warning(
@@ -21,7 +22,7 @@ purlActiveRmd_thenPlanMake <- function(){
   # cacheNew = drake::new_cache(path=yml$drake_cache)
 
   # normalizePath(activeRmd) -> activeRmd
-  # stringr::str_remove(activeRmd, rootPath) ->
+  # stringr::str_remove(activeRmd, webDirRoot) ->
   #   html2open
   webDirRoot <- dirname(activeRmd)
   activeRmdBase <- basename(activeRmd)
@@ -83,7 +84,7 @@ visActiveRmd_plan <- function(){
 #' @export
 #'
 #' @examples none
-purl_drakePlan <- function(filename, plan_name){
+purl_drakePlan <- function(filename, plan_name, activePath="."){
   readLines(filename) -> Rmdlines
 
   stringr::str_extract(
@@ -103,12 +104,20 @@ purl_drakePlan <- function(filename, plan_name){
 
       names(paramsList) <- paramNames
 
-      rdsName = glue::glue(
+      activePath <- dirname(filename)
+
+      rdsName <- glue::glue(
         "params_{filetitle}.rds")
+
+      rdsfilename <- file.path(
+        activePath, rdsName)
       saveRDS(paramsList,
-              file=rdsName)
+              file=rdsfilename
+      )
+
       paramsSetupString <-
-        glue::glue("params=readRDS(\"{rdsName}\")")
+        glue::glue("params=readRDS(\"")+rdsfilename+"\")"
+
     } else {
       paramsSetupString="# no params in the frontmatter"
     }
@@ -186,7 +195,7 @@ purl_drakePlan <- function(filename, plan_name){
         )
       targetSlice <-
         c(
-          glue::glue("# >> {oneSlice$object}--------------"),
+          glue::glue("# >> ")+oneSlice$object+"--------------",
           oneSliceBody,
           ""
         )
@@ -209,8 +218,8 @@ purl_drakePlan <- function(filename, plan_name){
   # produce drake R script
   {
     prefix <- c(
-      "# {plan_name}------------",
-      "{plan_name}=drake::drake_plan(",
+      glue::glue("# ")+plan_name+"------------",
+      glue::glue("")+plan_name+"=drake::drake_plan(",
       "# > plan begins -----------"
     )
     suffix <- c(
@@ -218,33 +227,39 @@ purl_drakePlan <- function(filename, plan_name){
       ")",
       ""
     )
+    cachePath=file.path(activePath,basename(.cacheNew$path))
     makePlan <- c(
       "# make plan -----------------",
-      "mk_{plan_name} = function(cachePath=\"{.cacheNew$path}\"){",
+      glue::glue("mk_")+plan_name+" = function(cachePath=\""+cachePath+"\")",
+      "{",
       frontmatterParams,
       "",
       makecondition,
       "",
       # "mkEnv=rlang::current_env()",
       "library(drake)",
-      "options(rstudio_drake_cache = storr::storr_rds(\"{.cacheNew$path}\", hash_algorithm = \"xxhash64\"))",
-      "make({plan_name}, cache=drake::drake_cache(path=cachePath))",
+      glue::glue("options(rstudio_drake_cache = storr::storr_rds(\"")+cachePath+"\", hash_algorithm = \"xxhash64\"))",
+      glue::glue("make(")+plan_name+", cache=drake::drake_cache(path=cachePath))",
       afterMakeCodes,
       "}",
       "",
-      "vis_{plan_name} <- function(cachePath=\"{.cacheNew$path}\"){",
+      glue::glue("vis_")+plan_name+" <- function(cachePath=\""+cachePath+"\")",
+      "{",
       frontmatterParams,
       "",
       makecondition,
-      "drake::vis_drake_graph({plan_name}, cache=drake::drake_cache(path=cachePath))",
+      glue::glue("drake::vis_drake_graph(")+plan_name+", cache=drake::drake_cache(path=cachePath))",
       "}",
-      "meta_{plan_name}=",
+      glue::glue("meta_")+plan_name+"=",
       "list(",
-      "cachePath=\"{.cacheNew$path}\",",
-      "readd=function(t) {
-  drake::readd(t,cache=drake::drake_cache(path=\"{.cacheNew$path}\"))},",
-      "clean=function(t=NULL) {
-  drake::clean(t,cache=drake::drake_cache(path=\"{.cacheNew$path}\"))})",
+      {glue::glue("cachePath=\"")+cachePath+"\","},
+      "readd=function(t) {",
+      glue::glue("drake::readd(t,cache=drake::drake_cache(path=\"")+cachePath+"\"))",
+      "},",
+      "clean=function(t=NULL) {",
+      glue::glue("drake::clean(t,cache=drake::drake_cache(path=\"")+
+        cachePath+"\"))",
+      "})",
       ""
     )
 

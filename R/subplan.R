@@ -26,6 +26,7 @@ purlActiveMainRmd_thenPlanMake <- function(){
   # normalizePath(activeRmd) -> activeRmd
   # stringr::str_remove(activeRmd, rootPath) ->
   #   html2open
+
   webDirRoot <- dirname(activeRmd)
   activeRmdBase <- basename(activeRmd)
   xfun::read_utf8(
@@ -61,7 +62,7 @@ purlActiveMainRmd_thenPlanMake <- function(){
                           get_filetitle(subplanfilename)) -> subplans[[.x]]$paramsSetupString
 
     # obtain Regex for later rename subplan targets
-    get_patternReplacementExp(subplanSingleton) ->
+    get_patternReplacementExp(subplanSingleton, .x) ->
       subplans[[.x]]$patternReplacementExp
     stringr::str_subset(subplans[[.x]]$targets, "makecondition",
                         negate=T) -> subplans[[.x]]$targets
@@ -258,38 +259,37 @@ purlActiveMainRmd_thenPlanMake <- function(){
       subplansParamSetupString
     )
   }
-
+  cachePath = file.path(webDirRoot, frontmatter$drake_cache)
   make_vis_elements = {
     c(
       "# make plan -----------------",
-      glue::glue("mk_grand<mainPlan$planname} = function(cachePath=\"<frontmatter$drake_cache}\"){",.open="<"),
+      glue::glue("mk_grand")+mainPlan$planname+" = function(cachePath=\""+cachePath+"\")",
+      "}",
       stackedParamString,
       "",
       stackedMakecondition,
       "",
       # "mkEnv=rlang::current_env()",
       "library(drake)",
-      glue::glue("options(rstudio_drake_cache = storr::storr_rds(\"{frontmatter$drake_cache}\", hash_algorithm = \"xxhash64\"))"),
-      glue::glue("make(grand{mainPlan$planname}, cache=drake::drake_cache(path=cachePath))"),
+      glue::glue("options(rstudio_drake_cache = storr::storr_rds(\"")+cachePath+"\", hash_algorithm = \"xxhash64\"))",
+      glue::glue("make(grand")+mainPlan$planname+", cache=drake::drake_cache(path=cachePath))",
       # afterMakeCodes,
       "}",
       "",
-      glue::glue("vis_grand<<mainPlan$planname>> <- function(cachePath=\"<<frontmatter$drake_cache>>\"){",.open="<<",.close=">>"),
+      glue::glue("vis_grand")+mainPlan$planname+" <- function(cachePath=\""+cachePath+"\")",
+      "{",
       stackedParamString,
       "",
       stackedMakecondition,
-      glue::glue("drake::vis_drake_graph(grand{mainPlan$planname}, cache=drake::drake_cache(path=cachePath))"),
+      glue::glue("drake::vis_drake_graph(grand")+mainPlan$planname+", cache=drake::drake_cache(path=cachePath))",
       "}",
-      glue::glue("meta_grand{mainPlan$planname}="),
+      glue::glue("meta_grand")+mainPlan$planname+"=",
       "list(",
-      glue::glue("cachePath=\"{frontmatter$drake_cache}\","),
-      glue::glue("readd=function(t) {
-  drake::readd(t,cache=drake::drake_cache(path=\"<<frontmatter$drake_cache>>\"))},",
-                 .open="<<", .close=">>"),
-      glue::glue("clean=function(t=NULL) {
-  drake::clean(t,cache=drake::drake_cache(path=\"<<frontmatter$drake_cache>>\"))})",
-                 .open="<<", .close=">>"),
-      ""
+      glue::glue("cachePath=\"")+cachePath+"\",",
+      "readd=function(t) {",
+      glue::glue("drake::readd(t,cache=drake::drake_cache(path=\"")+cachePath+"\"))},",
+      "clean=function(t=NULL) {",
+      glue::glue("drake::clean(t,cache=drake::drake_cache(path=\"")+cachePath+"\"))})"
     )
   }
 
@@ -501,13 +501,21 @@ purl_drakeSubplanOnly <- function(filename, mainPlanCachePath){
     if(length(params)!=0){
       paramsList <- purrr::map(
         params,~purrr::pluck(.x, "value"))
+      rdsPath <- dirname(filename)
+      activePath <- dirname(filename)
 
-      rdsName = glue::glue(
+      rdsName <- glue::glue(
         "params_{filetitle}.rds")
+
+      rdsfilename <- file.path(
+        activePath, rdsName)
       saveRDS(paramsList,
-              file=rdsName)
+              file=rdsfilename
+      )
+
       paramsSetupString <-
-        glue::glue("params=readRDS(\"{rdsName}\")")
+        glue::glue("params=readRDS(\"")+rdsfilename+"\")"
+
     } else {
       paramsSetupString="# no params in the frontmatter"
     }
@@ -677,22 +685,107 @@ purl_drakeSubplanOnly <- function(filename, mainPlanCachePath){
   )
 
 }
-get_patternReplacementExp <- function(subplanSingleton){
+get_patternReplacementExp <- function(subplanSingleton, subIndex){
   subplanSingleton$targets -> subplanTargets
   stringr::str_subset(subplanTargets,
                       "makecondition",
                       negate =T) -> subplanTargets
-  patternReplacementExp = paste0("sub",.x,"_",subplanTargets)
+  patternReplacementExp = paste0("sub",subIndex,"_",subplanTargets)
   names(patternReplacementExp) <-
     paste0("\\b",subplanTargets,"\\b")
   patternReplacementExp
 }
 get_filetitle = function(activeRmd){
   activeRmd %>%
-    basename() %>%
+    basename() -> activeRmdBase
+  activeRmdBase %>%
     getExtension() -> fileExtension
   stringr::str_remove(
     activeRmdBase,
     glue::glue("\\.{fileExtension}")) -> filetitle
   filetitle
+}
+# cachePath = file.path(dirname(activeRmd),yml$drake_cache)
+# subplansPath = file.path(dirname(activeRmd),yml$drake_subplans)
+
+extract_infoFromFilename <- function(activeRmd){
+  frontmatter <- yml <- rmarkdown::yaml_front_matter(activeRmd)
+  if(!exists("yml") || !("drake_cache" %in% names(yml))){
+    stop(
+      "Frontmatter has no drake_cache assigned.")
+  }
+  # if(!exists("yml") || !("drake_subplans" %in% names(yml))){
+  #   stop(
+  #     "Frontmatter has no drake child Rmds assigned.
+  #     Maybe you should use purlActiveRmd_thenPlanMake")
+  # }
+
+  # get main Root, basename, planname, and readLines
+  mainRoot <- dirname(activeRmd)
+  mainBasename <- basename(activeRmd)
+  if(
+    stringr::str_detect(mainBasename,"\\.[Rr][Mm][Dd]", negate=T)
+  ){
+    stop('This is an Rmd File.')
+  }
+  mainBasenameNoExtension <-
+    stringr::str_extract(mainBasename,"[^/]+(?=\\.[Rr][Mm][Dd]$)")
+
+  mainPlanname <- get_planname(mainBasename)
+
+  xfun::read_utf8(
+    activeRmd
+  ) -> RmdLines
+
+  planDetails <- list(
+    RmdLines=RmdLines,
+    frontmatter=frontmatter,
+    fullname=activeRmd,
+    root=mainRoot,
+    basename=mainBasename,
+    filetitle=mainBasenameNoExtension, #basenameNoExtension
+    planname=mainPlanname
+  )
+
+  planDetails
+}
+
+saveParamRdsAndGet_paramsSetupString = function(planDetails){
+
+  if(
+    ("params" %in% names(planDetails$frontmatter)) &&
+    (length(planDetails$frontmatter$params) !=0)
+  ){
+
+    filetitle <- planDetails$filetitle
+    rdsName = glue::glue(
+      "params_{filetitle}.rds")
+
+    rdsfilepath <- file.path(planDetails$root, rdsName)
+    saveRDS(planDetails$frontmatter$params,
+            file=rdsfilepath)
+
+    paramsSetupString <-
+      glue::glue("params=readRDS(\"{rdsfilepath}\")")
+  } else {
+    paramsSetupString="# no params in the frontmatter"
+  }
+
+  paramsSetupString
+}
+
+makeup_frontmatter <- function(planDetails){
+  # get_frontmatterList(RmdLines) -> frontmatter
+  # pad path to full path
+  planDetails$frontmatter$drake_cache %>%
+    file.path(planDetails$root, .) -> planDetails$frontmatter$drake_cache
+  planDetails$frontmatter$drake_subplans %>%
+    file.path(planDetails$root, .) -> planDetails$frontmatter$drake_subplans
+
+
+  # save ...params_XXX.rds
+  saveParamRdsAndGet_paramsSetupString(planDetails
+  ) -> planDetails$frontmatter$paramsSetup
+
+  planDetails
 }
