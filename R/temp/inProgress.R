@@ -4,86 +4,36 @@ purlActiveMainRmd_thenPlanMake <- function(){
   # activeSource$path -> activeRmd
   extract_activeEditorFilename()
   activeRmd <- .activeFile
-  frontmatter <- yml <- rmarkdown::yaml_front_matter(activeRmd)
-  if(!exists("yml") || !("drake_cache" %in% names(yml))){
-    stop(
-      "Frontmatter has no drake_cache assigned.")
+
+  require(dplyr)
+  mainplanDetails <-
+    {
+    activeRmd %>%
+      extract_infoFromFilename() %>%
+      # make frontmatter path absolute and create params string
+      #  for extra makecondition
+      makeup_frontmatter() %>%
+      ## build scripts of main and sub plans
+      purl_drakeSubplanOnly2()
   }
-  if(!exists("yml") || !("drake_subplans" %in% names(yml))){
-    stop(
-      "Frontmatter has no drake child Rmds assigned.
-      Maybe you should use purlActiveRmd_thenPlanMake")
-  }
-
-  # get main Root, basename, planname, and readLines
-  mainRoot <- dirname(activeRmd)
-  mainBasename <- basename(activeRmd)
-  if(
-    stringr::str_detect(mainBasename,"\\.[Rr][Mm][Dd]", negate=T)
-    ){
-    stop('This is an Rmd File.')
-  }
-  mainBasenameNoExtension <-
-    stringr::str_extract(mainBasename,"[^/]+(?=\\.[Rr][Mm][Dd]$)")
-
-  mainPlanname <- get_planname(mainBasename)
-
-  xfun::read_utf8(
-    activeRmd
-  ) -> RmdLines
-
-  planDetails <- list(
-    RmdLines=RmdLines,
-    fullname=activeRmd,
-    root=mainRoot,
-    basename=mainBasename,
-    filetitle=mainBasenameNoExtension, #basenameNoExtension
-    planname=mainPlanname
-  )
-
-  # get_frontmatterList(RmdLines) -> frontmatter
-  # pad path to full path
-  frontmatter$drake_cache %>%
-    file.path(planDetails$root, .) -> frontmatter$drake_cache
-  frontmatter$drake_subplans %>%
-    file.path(planDetails$root, .) -> frontmatter$drake_subplans
-  planDetails$frontmatter <- frontmatter
-
-  # save ...params_XXX.rds
-  saveParamRdsAndGet_paramsSetupString(planDetails
-  ) -> mainPlanParamsSetupString
-
-  planDetails$frontmatter$paramsSetup <-
-      mainPlanParamsSetupString
-
-  ## build scripts of main and sub plans
-  mainPlanDetails=
-    purl_drakeSubplanOnly(planDetails)
 
 
 # subplans ----------------------------------------------------------------
 
 
-  subplans = vector("list", length(frontmatter$drake_subplans))
-  for(.x in seq_along(frontmatter$drake_subplans)){
-    # .x <-1
-    subplanfilename <- frontmatter$drake_subplans[[.x]]
-    subplanfilename <- file.path(
-      webDirRoot,
-      frontmatter$drake_subplans[[.x]]
-    )
-    subplanfilename %>%
-      xfun::read_utf8(con=.) -> subplanRmdLines#%>%
-    subplanSingleton <- subplans[[.x]] <-
-      purl_drakeSubplanOnly(subplanfilename, frontmatter$drake_cache)
-    get_paramsSetupString(subplanRmdLines,
-                          get_filetitle(subplanfilename)) -> subplans[[.x]]$paramsSetupString
+  subplans = vector("list", length(mainplanDetails$frontmatter$drake_subplans))
+  for(.x in seq_along(mainplanDetails$frontmatter$drake_subplans)){
+    subplans[[.x]] <-
+      {
+        mainplanDetails$frontmatter$drake_subplans[[.x]] %>%
+          extract_infoFromFilename() %>%
+          # make frontmatter path absolute and create params string
+          #  for extra makecondition
+          makeup_frontmatter() %>%
+          ## build scripts of main and sub plans
+          purl_drakeSubplanOnly2()
+      }
 
-    # obtain Regex for later rename subplan targets
-    get_patternReplacementExp(subplanSingleton, .x) ->
-      subplans[[.x]]$patternReplacementExp
-    stringr::str_subset(subplans[[.x]]$targets, "makecondition",
-                        negate=T) -> subplans[[.x]]$targets
   }
 
   append(

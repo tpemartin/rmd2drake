@@ -1,56 +1,27 @@
 
-# purl at the main Rmd
-purlActiveMainRmd_thenPlanMake <- function(){
-  require(dplyr)
-  # rstudioapi::getSourceEditorContext() -> activeSource
-  # activeSource$path -> activeRmd
-  extract_activeEditorFilename()
-  activeRmd <- .activeFile
-  yml <- rmarkdown::yaml_front_matter(activeRmd)
-  if(!exists("yml") || !("drake_cache" %in% names(yml))){
-    stop(
-      "Frontmatter has no drake_cache assigned.")
-  }
-  if(!exists("yml") || !("drake_subplans" %in% names(yml))){
-    stop(
-      "Frontmatter has no drake child Rmds assigned.
-      Maybe you should use purlActiveRmd_thenPlanMake")
-  }
-  generate_hiddenCacheNew(yml)
-  # cacheNew = drake::new_cache(path=yml$drake_cache)
 
-  # normalizePath(activeRmd) -> activeRmd
-  # stringr::str_remove(activeRmd, rootPath) ->
-  #   html2open
-  webDirRoot <- dirname(activeRmd)
-  activeRmdBase <- basename(activeRmd)
-  xfun::read_utf8(
-    activeRmd
-  ) -> RmdLines
-  get_frontmatterList(RmdLines) -> frontmatter
-  drakeMainPlanname <-
-    paste0("plan_",
-           stringr::str_remove(activeRmdBase,"\\.[rR][mM][dD]$"))
 
-  ## build scripts of main and sub plans
-  mainPlan=
-    purl_drakeSubplanOnly(activeRmd, drakeMainPlanname)
-  subplans = vector("list", length(frontmatter$drake_subplans))
-  for(.x in seq_along(frontmatter$drake_subplans)){
-    # .x <-1
-    subplanfilename <- frontmatter$drake_subplans[[.x]]
-    subplanfilename <- file.path(
-      webDirRoot,
-      frontmatter$drake_subplans[[.x]]
-    )
-    subplans[[.x]] <-
-      purl_drakeSubplanOnly(subplanfilename, frontmatter$drake_cache)
-  }
+  planSingletonExpr <- str2expression(grandPlanscript)
+  eval(
+    planSingletonExpr,
+    env = .GlobalEnv
+  )
 
-  append(
-    list(mainPlan),
-    subplans) -> allPlans
 
+
+
+  ###### Make separate plans
+
+  planSingleton <- unlist(purrr::flatten(allPlans[[2]]))
+  planSingletonExpr <- str2expression(planSingleton)
+  planCombo <-
+
+  planSingleton <- unlist(purrr::flatten(allPlans[[2]]))
+  planSingletonExpr <- str2expression(planSingleton)
+  eval(
+    planSingletonExpr,
+    env = .GlobalEnv
+  )
   ######
   make(plan_login, cache=drake::drake_cache(path=cachePath))
 
@@ -227,6 +198,38 @@ purl_drakePlanOnly <- function(filename, plan_name){
         drakeBody,
         suffix
       )
+  }
+
+  addMakeVis = {
+    makePlan <- c(
+      "# make plan -----------------",
+      "mk_{plan_name} = function(cachePath=\"{.cacheNew$path}\"){",
+      frontmatterParams,
+      "",
+      makecondition,
+      "",
+      # "mkEnv=rlang::current_env()",
+      "library(drake)",
+      "options(rstudio_drake_cache = storr::storr_rds(\"{.cacheNew$path}\", hash_algorithm = \"xxhash64\"))",
+      "make({plan_name}, cache=drake::drake_cache(path=cachePath))",
+      afterMakeCodes,
+      "}",
+      "",
+      "vis_{plan_name} <- function(cachePath=\"{.cacheNew$path}\"){",
+      frontmatterParams,
+      "",
+      makecondition,
+      "drake::vis_drake_graph({plan_name}, cache=drake::drake_cache(path=cachePath))",
+      "}",
+      "meta_{plan_name}=",
+      "list(",
+      "cachePath=\"{.cacheNew$path}\",",
+      "readd=function(t) {
+  drake::readd(t,cache=drake::drake_cache(path=\"{.cacheNew$path}\"))},",
+      "clean=function(t=NULL) {
+  drake::clean(t,cache=drake::drake_cache(path=\"{.cacheNew$path}\"))})",
+      ""
+    )
   }
 
 

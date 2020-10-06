@@ -4,7 +4,7 @@
 \alias{set_gitignore}
 \title{Setup .gitignore to fit R users, also purge those tracked-but-should-be-ignored files}
 \usage{
-set_gitignore()
+set_gitignore(...)
 }
 \value{
 
