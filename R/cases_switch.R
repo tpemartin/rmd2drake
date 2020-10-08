@@ -100,11 +100,13 @@ convert2drakeplanAndMake <- function() {
         parse(text = .)
       } %>%
       eval(envir = .GlobalEnv)
+    # browser()
     grandplanDetails$visfunctionText %>%
       {
         parse(text = .)
       } %>%
       eval(envir = .GlobalEnv)
+
     xfun::write_utf8(
       grandplanDetails$completePlanMkVisScript,
       con = destfile
