@@ -16,3 +16,8 @@ Binding: extract_activeEditorFilename
 Interactive: true
 
 
+Name: Create/Make Active Rmd plan
+Description: New Addin Description
+Binding: convert2drakeplanAndMake
+Interactive: false
+

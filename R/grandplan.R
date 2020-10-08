@@ -1,3 +1,10 @@
+#' Purl Activive Main Plan Rmd, with its subplan Rmds to a Grandplan
+#' then make it
+#'
+#' @return
+#' @export
+#'
+#' @examples none
 purlActiveMainRmd_thenPlanMake <- function()
 {
   grandplanDetails <- generateGrandplanScriptFromActiveRmd()
@@ -18,23 +25,47 @@ purlActiveMainRmd_thenPlanMake <- function()
 
 }
 
-mkvis_functional <- function(prefix){
-  function(){
-    require(dplyr)
-    details <- rstudioapi::getActiveDocumentContext()
-    details$path %>%
-      stringr::str_extract(
-        "[^/]+(?=\\.[Rr][mM][Dd]$)"
-      ) %>%
-      paste0(prefix,"_grandplan_",.,"()") -> commandText
+#' make function for current active grandplan
+#'
+#' @return
+#' @export
+#'
+#' @examples none
+mk_currentActiveGrandPlan <-   function(){
+  require(dplyr)
+  details <- rstudioapi::getActiveDocumentContext()
+  details$path %>%
+    stringr::str_extract(
+      "[^/]+(?=\\.[Rr][mM][Dd]$)"
+    ) %>%
+    paste0("mk_grandplan_",.,"()") -> commandText
 
-    eval(
-      parse(text=commandText), envir = .GlobalEnv
-    )
-  }
+  eval(
+    parse(text=commandText), envir = .GlobalEnv
+  )
 }
-mk_currentActiveRmd <- mkvis_functional("mk")
-vis_currentActiveRmd <- mkvis_functional("vis")
+
+
+#' Visualize the current active grand plan
+#'
+#' @return
+#' @export
+#'
+#' @examples none
+vis_currentActiveMainPlan <-   function(){
+  require(dplyr)
+  details <- rstudioapi::getActiveDocumentContext()
+  details$path %>%
+    stringr::str_extract(
+      "[^/]+(?=\\.[Rr][mM][Dd]$)"
+    ) %>%
+    paste0("vis_grandplan_",.,"()") -> commandText
+
+  eval(
+    parse(text=commandText), envir = .GlobalEnv
+  )
+}
+
 
 #' Generate grandplan_XXX.R from active Rmd main plan
 #'
@@ -133,3 +164,24 @@ generateGrandplanScriptFromActiveRmd <- function(){
 
   invisible(grandplanDetails)
 }
+
+
+# helpers -----------------------------------------------------------------
+
+
+mkvis_functional <- function(prefix){
+  function(){
+    require(dplyr)
+    details <- rstudioapi::getActiveDocumentContext()
+    details$path %>%
+      stringr::str_extract(
+        "[^/]+(?=\\.[Rr][mM][Dd]$)"
+      ) %>%
+      paste0(prefix,"_grandplan_",.,"()") -> commandText
+
+    eval(
+      parse(text=commandText), envir = .GlobalEnv
+    )
+  }
+}
+

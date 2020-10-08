@@ -1,4 +1,3 @@
-###
 #' Purl active Rmd into a drake plan R script, named "plan_{activeRmdName}.R", then make the plan.
 #'
 #' @return
