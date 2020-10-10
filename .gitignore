@@ -37,3 +37,8 @@ vignettes/*.pdf
 # End of https://www.toptal.com/developers/gitignore/api/r
 .DS_Store
 **/.DS_Store
+R/.login
+.login/
+.googleLogin/
+.drake/
+.cache/

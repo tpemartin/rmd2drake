@@ -21,3 +21,8 @@ Description: New Addin Description
 Binding: convert2drakeplanAndMake
 Interactive: false
 
+Name: Clean target at cursor
+Description: New Addin Description
+Binding: rs_addin_clean
+Interactive: false
+
