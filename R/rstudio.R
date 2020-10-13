@@ -3,7 +3,7 @@
 #' @return
 #' @export
 #'
-#' @examples
+#' @examples none
 rs_addin_clean <- function() {
   context <- rstudioapi::getActiveDocumentContext()
   target <- drake:::rs_get_symbol_at_cursor(context)

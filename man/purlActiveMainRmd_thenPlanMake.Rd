@@ -5,7 +5,7 @@
 \title{Purl Activive Main Plan Rmd, with its subplan Rmds to a Grandplan
 then make it}
 \usage{
-purlActiveMainRmd_thenPlanMake()
+purlActiveMainRmd_thenPlanMake(visAfterMake = T)
 }
 \value{
 

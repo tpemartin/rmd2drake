@@ -5,7 +5,7 @@
 #' @export
 #'
 #' @examples none
-purlActiveMainRmd_thenPlanMake <- function()
+purlActiveMainRmd_thenPlanMake <- function(visAfterMake=T)
 {
   grandplanDetails <- generateGrandplanScriptFromActiveRmd()
 
@@ -21,7 +21,14 @@ purlActiveMainRmd_thenPlanMake <- function()
                   grandplanDetails$planname,
                   "()")
     ), envir = .GlobalEnv)
-
+  if(visAfterMake){
+    eval(
+      parse(
+        text=paste0("vis_",
+                    grandplanDetails$planname,
+                    "()")
+      ), envir = .GlobalEnv)
+  }
 
 }
 

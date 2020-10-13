@@ -12,3 +12,6 @@ rs_addin_clean()
 \description{
 Clean target at cursor
 }
+\examples{
+none
+}

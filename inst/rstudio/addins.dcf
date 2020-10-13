@@ -26,3 +26,13 @@ Description: New Addin Description
 Binding: rs_addin_clean
 Interactive: false
 
+Name: Create plan Rmd from R script
+Description: New Addin Description
+Binding: produceRmdFromActiveRscript
+Interactive: false
+
+Name: get selection
+Description: New Addin Description
+Binding: get_selection
+Interactive: false
+
