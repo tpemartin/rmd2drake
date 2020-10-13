@@ -2,7 +2,7 @@
 % Please edit documentation in R/drake.R
 \name{visActiveRmd_plan}
 \alias{visActiveRmd_plan}
-\title{visualize active Rmd's "plan_{activeRmdName}"}
+\title{visualize active Rmd's "(grand)plan_{activeRmdName}"}
 \usage{
 visActiveRmd_plan()
 }
@@ -10,7 +10,7 @@ visActiveRmd_plan()
 
 }
 \description{
-visualize active Rmd's "plan_{activeRmdName}"
+visualize active Rmd's "(grand)plan_{activeRmdName}"
 }
 \examples{
 purlActiveRmd_thenPlanMake()

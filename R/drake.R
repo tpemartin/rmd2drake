@@ -43,7 +43,41 @@ purlActiveRmd_thenPlanMake <- function(){
 }
 
 ###
-#' visualize active Rmd's "plan_{activeRmdName}"
+#' make active Rmd's "(grand)plan_{activeRmdName}"
+#'
+#' @return
+#' @export
+#'
+#' @examples purlActiveRmd_thenPlanMake()
+mkActiveRmd_plan <- function(){
+  require(dplyr)
+  require(drake)
+  # rstudioapi::getSourceEditorContext() -> activeSource
+  # activeSource$path -> activeRmd
+  extract_activeEditorFilename()
+  activeRmd <- .activeFile
+  yml <- rmarkdown::yaml_front_matter(activeRmd)
+  if ("drake_subplans" %in% names(yml)) {
+    prefix <- "mk_grandplan_"
+  } else {
+    prefix <- "mk_plan_"
+  }
+
+  activeRmd %>%
+    basename() %>%
+    stringr::str_remove(".[a-zA-Z]+$") %>%
+    paste0(prefix,.) -> mkPlanName
+
+  if(!exists(mkPlanName)){
+    convert2drakeplanAndMake()
+  }
+
+  mkPlanName %>%
+    call() %>%
+    eval()
+
+}
+#' visualize active Rmd's "(grand)plan_{activeRmdName}"
 #'
 #' @return
 #' @export
@@ -56,13 +90,20 @@ visActiveRmd_plan <- function(){
   # activeSource$path -> activeRmd
   extract_activeEditorFilename()
   activeRmd <- .activeFile
+  yml <- rmarkdown::yaml_front_matter(activeRmd)
+  if ("drake_subplans" %in% names(yml)) {
+    prefix <- "vis_grandplan_"
+  } else {
+    prefix <- "vis_plan_"
+  }
+
   activeRmd %>%
     basename() %>%
     stringr::str_remove(".[a-zA-Z]+$") %>%
-    paste0("vis_plan_",.) -> visPlanName
+    paste0(prefix,.) -> visPlanName
 
   if(!exists(visPlanName)){
-    purlActiveRmd_thenPlanMake()
+    convert2drakeplanAndMake()
   }
 
   visPlanName %>%

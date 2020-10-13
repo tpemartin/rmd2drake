@@ -88,8 +88,6 @@ convert2drakeplanAndMake <- function() {
       grandplanDetails
     }
 
-
-
   if ("drake_subplans" %in% names(yml)) {
     destfile <- file.path(
       mainplanDetails$root,
@@ -114,8 +112,16 @@ convert2drakeplanAndMake <- function() {
     assign(grandplanDetails$planname, grandplan,
            envir = .GlobalEnv)
     rm(list="grandplan", envir = .GlobalEnv)
+
+    callMake <- rlang::call2(glue::glue("mk_{grandplanDetails$planname}"))
+    rlang::eval_tidy(callMake, env = .GlobalEnv)
+
+    callVis <- rlang::call2(glue::glue("vis_{grandplanDetails$planname}"))
+    rlang::eval_tidy(callVis, env = .GlobalEnv)
+
     invisible(grandplanDetails)
   } else {
+
     destfile <- file.path(
       mainplanDetails$root,
       paste0("plan_", mainplanDetails$filetitle, ".R")
@@ -129,7 +135,23 @@ convert2drakeplanAndMake <- function() {
       mainplanDetails$completePlanMkVisScript,
       con = destfile
     )
+
+
+    callMake <- rlang::call2(glue::glue("mk_{mainplanDetails$planname}"))
+    message(
+      "Executing ", rlang::expr_text(callMake)
+    )
+    rlang::eval_tidy(callMake, env = .GlobalEnv)
+
+    callVis <- rlang::call2(glue::glue("vis_{mainplanDetails$planname}"))
+    message(
+      "Executing ", rlang::expr_text(callVis)
+    )
+    rlang::eval_tidy(callVis, env = .GlobalEnv)
+
+    rlang::exec(glue::glue("vis_{mainplanDetails$planname}"))
     invisible(mainplanDetails)
   }
+
 
 }

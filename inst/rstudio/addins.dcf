@@ -1,14 +1,27 @@
-Name: Rmd-plan-make
-Description: Turn activeRmd into drake plan
-Binding: purlActiveRmd_thenPlanMake
-Interactive: true
+Name: Active Rmd->Drake Plan->Make
+Description: New Addin Description
+Binding: convert2drakeplanAndMake
+Interactive: false
 
+Name: Make active plan
+Description: New Addin Description
+Binding: mkActiveRmd_plan
+Interactive: false
 
 Name: Visualize active plan
 Description: New Addin Description
 Binding: visActiveRmd_plan
 Interactive: true
 
+Name: Clean target(s)/at cursor
+Description: New Addin Description
+Binding: rs_addin_clean
+Interactive: false
+
+Name: Active Drake R -> plan Rmd
+Description: New Addin Description
+Binding: produceRmdFromActiveRscript
+Interactive: false
 
 Name: Get .activeFile
 Description: New Addin Description
@@ -16,23 +29,7 @@ Binding: extract_activeEditorFilename
 Interactive: true
 
 
-Name: Create/Make Active Rmd plan
-Description: New Addin Description
-Binding: convert2drakeplanAndMake
-Interactive: false
-
-Name: Clean target at cursor
-Description: New Addin Description
-Binding: rs_addin_clean
-Interactive: false
-
-Name: Create plan Rmd from R script
-Description: New Addin Description
-Binding: produceRmdFromActiveRscript
-Interactive: false
-
 Name: get selection
 Description: New Addin Description
 Binding: get_selection
 Interactive: false
-
