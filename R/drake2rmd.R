@@ -13,7 +13,6 @@ produceRmdFromActiveRscript <- function(removePlanPrefix=T)
   if(!stringr::str_detect(activeR, "\\.[Rr]$")){
     stop("This is not a R script file.")
   }
-
   require(purrr)
   require(dplyr)
   # run drake R script
@@ -137,16 +136,16 @@ generate_RmdCodeChunkFromOneTarget <- function(targetRow){
     paste0("## ", targetRow$target),
     "",
     paste0("```{r ",targetRow$target,"}"),
-    paste0(targetRow$target, " = {"),
+    paste0(targetRow$target, " = "),
     {
       targetRow$command %>%
-        rlang::expr_text() %>%
+        map_chr(
+          ~rlang::expr_text(.x)
+        ) %>%
         stringr::str_split("\\n") %>%
         unlist() -> code_text
-      code_text[2:(length(code_text)-1)]
+      code_text
     },
-
-    paste0("}"),
     "```",
     ""
   )

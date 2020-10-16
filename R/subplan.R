@@ -655,7 +655,7 @@ purl_drakeSubplanOnly2 <- function(planDetails){
 
 }
 
-augment_planScript_make_vis_components <- function(planDetails){
+augment_planScript_make_vis_loadcomponents <- function(planDetails){
   planDetails$makeText = glue::glue("drake::make({planDetails$planname},
                   cache=drake::drake_cache(
                     path=\"{planDetails$frontmatter$drake_cache}\"))")
@@ -672,14 +672,25 @@ augment_planScript_make_vis_components <- function(planDetails){
   planDetails$visText=
     glue::glue("drake::vis_drake_graph({planDetails$planname},
                   cache=drake::drake_cache(
-                    path=\"{planDetails$frontmatter$drake_cache}\"))")
+                    path=\"{planDetails$frontmatter$drake_cache}\"),...)")
   planDetails$visfunctionText=
     c(
       glue::glue("vis_")+planDetails$planname+
-        "= function()",
+        "= function(...)",
       "{",
       planDetails$augmentedMakeconditions,
       planDetails$visText,
+      "}"
+    )
+  planDetails$loaddText = glue::glue("drake::loadd(...,
+                  cache=drake::drake_cache(
+                    path=\"{planDetails$frontmatter$drake_cache}\"), envir = .GlobalEnv)")
+  planDetails$loaddfunctionText =
+    c(
+      glue::glue("load_")+planDetails$planname+
+        "= function(...)",
+      "{",
+      planDetails$loaddText,
       "}"
     )
 
@@ -688,7 +699,8 @@ augment_planScript_make_vis_components <- function(planDetails){
       planDetails$augmentedMakeconditions,
       planDetails$drakePlanScript,
       planDetails$makefunctionText,
-      planDetails$visfunctionText
+      planDetails$visfunctionText,
+      planDetails$loaddfunctionText
     )
   planDetails
 }

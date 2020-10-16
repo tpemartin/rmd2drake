@@ -25,7 +25,7 @@ convert2drakeplanAndMake <- function() {
       rmd2drake:::purl_drakeSubplanOnly2() %>%
       # augment makeconditions
       rmd2drake:::augment_makecondition() %>%
-      rmd2drake:::augment_planScript_make_vis_components()
+      rmd2drake:::augment_planScript_make_vis_loadcomponents()
   }
 
   # get mainplan plan object in global env
@@ -56,7 +56,7 @@ convert2drakeplanAndMake <- function() {
           purl_drakeSubplanOnly2() %>%
           # augment makeconditions
           augment_makecondition() %>%
-          augment_planScript_make_vis_components() -> subplans[[.x]]
+          augment_planScript_make_vis_loadcomponents() -> subplans[[.x]]
 
         # get subplan plan object to .GlobalEnv
         subplans[[.x]]$completePlanMkVisScript %>%
@@ -84,7 +84,7 @@ convert2drakeplanAndMake <- function() {
       grandplanDetails
 
       grandplanDetails %>%
-        augment_planScript_make_vis_components() ->
+        augment_planScript_make_vis_loadcomponents() ->
       grandplanDetails
     }
 
