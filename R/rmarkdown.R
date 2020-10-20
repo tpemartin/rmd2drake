@@ -30,8 +30,9 @@ get_chunksTable <- function(Rmdlines, engine = "r",
       stringr::str_trim(side="both") %>%
       stringr::str_detect(exclude) -> pickDrakeF
     whichHasRSetting[!pickDrakeF] -> whichHasDrakeObjects
+    pattern4objectname <-  glue::glue("(?<=```\\{<<engine>> )[[:alnum:]_]+", .open="<<", .close=">>")
     Rmdlines[whichHasDrakeObjects] %>%
-      stringr::str_extract("(?<=```\\{r )[[:alnum:]_]+") -> drakeObjects
+      stringr::str_extract(pattern4objectname) -> drakeObjects
   }
   # generate chunk table
   {
