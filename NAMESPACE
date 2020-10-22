@@ -3,6 +3,7 @@
 export("%//%")
 export(clip_planWrapper)
 export(convert2drakeplanAndMake)
+export(convertWebRmd2drakeplanAndMake)
 export(create_planRmd)
 export(generateGrandplanScriptFromActiveRmd)
 export(get_chunksTable)
