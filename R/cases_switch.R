@@ -67,10 +67,10 @@ convert2drakeplanAndMake <- function() {
           eval(envir = .GlobalEnv)
       }
 
-      # browser()
+      #
       # produce grandplan object (a combo plan) in global environment
       generate_grandplan(mainplanDetails, subplans)
-      # browser()
+      #
 
 
       # rlang::expr(grandplan <- !!sym(a))
@@ -99,7 +99,7 @@ convert2drakeplanAndMake <- function() {
         parse(text = .)
       } %>%
       eval(envir = .GlobalEnv)
-    # browser()
+    #
     grandplanDetails$visfunctionText %>%
       {
         parse(text = .)
@@ -113,7 +113,7 @@ convert2drakeplanAndMake <- function() {
     assign(grandplanDetails$planname, grandplan,
            envir = .GlobalEnv)
     rm(list="grandplan", envir = .GlobalEnv)
-    # browser()
+    #
     callMake <- rlang::call2(glue::glue("mk_{grandplanDetails$planname}"))
     rlang::eval_tidy(callMake, env = .GlobalEnv)
 
