@@ -19,6 +19,7 @@ convert2drakeplanAndMake <- function() {
       rmd2drake:::extract_infoFromFilename() -> mainplanDetails0
     # make frontmatter path absolute and create params string
     #  for extra makecondition
+
     mainplanDetails0 %>%
       rmd2drake:::makeup_frontmatter() %>%
       ## build scripts of main and sub plans
@@ -112,7 +113,7 @@ convert2drakeplanAndMake <- function() {
     assign(grandplanDetails$planname, grandplan,
            envir = .GlobalEnv)
     rm(list="grandplan", envir = .GlobalEnv)
-
+    # browser()
     callMake <- rlang::call2(glue::glue("mk_{grandplanDetails$planname}"))
     rlang::eval_tidy(callMake, env = .GlobalEnv)
 
