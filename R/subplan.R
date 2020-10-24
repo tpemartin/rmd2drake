@@ -658,11 +658,11 @@ purl_drakeSubplanOnly2 <- function(planDetails){
 augment_planScript_make_vis_loadcomponents <- function(planDetails){
   planDetails$makeText = glue::glue("drake::make({planDetails$planname},
                   cache=drake::drake_cache(
-                    path=\"{planDetails$frontmatter$drake_cache}\"))")
+                    path=\"{planDetails$frontmatter$drake_cache}\"),...)")
   planDetails$makefunctionText =
     c(
       glue::glue("mk_")+planDetails$planname+
-        "= function()",
+        "= function(...)",
       "{",
       planDetails$augmentedMakeconditions,
       planDetails$makeText,
