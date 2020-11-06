@@ -552,7 +552,7 @@ purl_drakeSubplanOnly2 <- function(planDetails){
       oneSliceBody[[1]] %>%
         stringr::str_replace("<-","=") -> oneSliceBody[[1]]
       if(oneSlice$object=="makecondition"){
-        makecondition <- oneSliceBody
+        makecondition <- c(makecondition, oneSliceBody)
         next
       }
 
