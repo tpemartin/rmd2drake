@@ -18,6 +18,11 @@ Description: New Addin Description
 Binding: rs_addin_clean
 Interactive: false
 
+Name: WebRmd -> Drake Plan -> Make
+Description: New Addin Description
+Binding: convertWebRmd2drakeplanAndMake
+Interactive: false
+
 Name: Active Drake R -> plan Rmd
 Description: New Addin Description
 Binding: produceRmdFromActiveRscript
@@ -33,3 +38,4 @@ Name: get selection
 Description: New Addin Description
 Binding: get_selection
 Interactive: false
+

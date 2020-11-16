@@ -491,9 +491,10 @@ makeup_frontmatter <- function(planDetails){
   planDetails
 }
 augment_makecondition <- function(planDetails){
-  c(planDetails$makecondition,
-    glue::glue("options(rstudio_drake_cache = storr::storr_rds(\"")+planDetails$frontmatter$drake_cache+"\", hash_algorithm = \"xxhash64\"))",
-    planDetails$frontmatter$paramsSetup) ->
+  c(
+    planDetails$frontmatter$paramsSetup,
+    planDetails$makecondition,
+    glue::glue("options(rstudio_drake_cache = storr::storr_rds(\"")+planDetails$frontmatter$drake_cache+"\", hash_algorithm = \"xxhash64\"))") ->
     planDetails$augmentedMakeconditions
   planDetails
 }
