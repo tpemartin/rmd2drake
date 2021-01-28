@@ -19,7 +19,7 @@ generate_drakeRmdFromActiveRmd <- function(needMakeconditionHolder=F, removeLabe
     get_chunksTable() -> chunkTable
 
   drakeRmdlines = {
-    map(
+    purrr::map(
       1:nrow(chunkTable),
       ~{
         seq(chunkTable$begin[[.x]]-1, chunkTable$end[[.x]]+1)
