@@ -44,3 +44,8 @@ Description: New Addin Description
 Binding: generate_drakeRmdFromActiveRmd
 Interactive: false
 
+Name: Initiate Drake
+Description: New Addin Description
+Binding: Drake
+Interactive: false
+

@@ -1,7 +1,7 @@
 Package: rmd2drake
 Type: Package
 Title: Turn R Markdown into a drake plan and make it
-Version: 0.2.4
+Version: 0.2.5
 Author: Martin Lin
 Maintainer: mtlin <mtlin@gm.ntpu.edu.tw>
 Description: With an Addin that turns active R markdown into a R script which defines a drake plan, a make function (to make the plan), and a vis function (to produce its dependency graph)

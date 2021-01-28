@@ -317,5 +317,24 @@ drake_generateMakeplanFunction <- function(drake){
         cache=drake::drake_cache(path=!!drake$activeRmd$frontmatter$drake_cache))
     ) -> exprMakeplan
     eval(exprMakeplan, envir=drake$.planEnvironment)
+
+    drake$load <- drake_generateLoadFunction(drake)
+
+  }
+  }
+drake_generateLoadFunction <- function(drake){
+  function(...){
+    planBasename <-
+      stringr::str_extract(basename(drake$activeRmd$filenames),"[^\\.]+")
+    planname <- rlang::sym(glue::glue("plan_{planBasename}"))
+    group_vars <- rlang::enquos(...)
+    rlang::expr(
+      drake::loadd(
+        !!!group_vars,
+        cache=drake::drake_cache(path=!!drake$activeRmd$frontmatter$drake_cache),
+        envir = .GlobalEnv)
+    ) -> exprLoadplan
+    eval(exprLoadplan, envir=drake$.planEnvironment)
+
   }
 }
