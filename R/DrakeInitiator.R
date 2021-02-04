@@ -308,6 +308,23 @@ drake_generateMakeplanFunction <- function(drake){
     # eval(parse(text=drake$process2get$storr_rdsOptions),
     #      envir=drake$.planEnvironment)
     # evaluate drake plan
+    drake$load <- drake_generateLoadFunction(drake)
+
+    # browser()
+    targets <- names(drake$process2get$codes$drakeTargetContent)
+    # drake$loadTarget <-
+    #   setNames(
+    #     vector("list", length(targets)),
+    #     targets
+    #   )
+    drake$loadTarget <-
+      setNames(
+        purrr::map(
+          targets,
+          ~drake_generateLoadCall(drake, .x)
+        ), targets
+      )
+
     planBasename <-
       stringr::str_extract(basename(drake$activeRmd$filenames),"[^\\.]+")
     planname <- rlang::sym(glue::glue("plan_{planBasename}"))
@@ -318,7 +335,6 @@ drake_generateMakeplanFunction <- function(drake){
     ) -> exprMakeplan
     eval(exprMakeplan, envir=drake$.planEnvironment)
 
-    drake$load <- drake_generateLoadFunction(drake)
 
   }
   }
@@ -334,7 +350,23 @@ drake_generateLoadFunction <- function(drake){
         cache=drake::drake_cache(path=!!drake$activeRmd$frontmatter$drake_cache),
         envir = .GlobalEnv)
     ) -> exprLoadplan
+
     eval(exprLoadplan, envir=drake$.planEnvironment)
 
   }
+}
+
+drake_generateLoadCall <- function(drake, target){
+  function(){
+    rlang::expr(
+      drake::loadd(
+        !!target,
+        cache=drake::drake_cache(path=!!drake$activeRmd$frontmatter$drake_cache),
+        envir = .GlobalEnv)
+    ) -> exprLoadplan
+
+    eval(exprLoadplan, envir = rlang::caller_env())
+
+  }
+
 }
