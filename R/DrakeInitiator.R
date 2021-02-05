@@ -66,7 +66,7 @@ Drake <- function(){
   drake$source_planExport <- drake_generatePlanExportFunction(drake)
 
 
-
+  drake$.updateCache <- updateCache(drake)
   # drake
   .GlobalEnv$drake <- drake
   invisible(drake)
@@ -370,3 +370,23 @@ drake_generateLoadCall <- function(drake, target){
   }
 
 }
+
+updateCache <- function(drake){
+  function (newCache = ".temp")
+  {
+    # newCache = ".temp"
+    newCachePath <- eval(parse(text=glue::glue("file.path(.root(),\"{newCache}\")")))
+    storr_rdsOptions <- drake$process2get$storr_rdsOptions
+    drake$process2get$storr_rdsOptions <-
+      stringr::str_replace(storr_rdsOptions,
+                           "(?<=(storr_rds\\(\"))[\"[:graph:]]+(?=\",)", glue::glue("{newCachePath}"))
+    drake$activeRmd$frontmatter$drake_cache <- newCachePath
+
+    if(newCache==".temp"){
+      message(
+      glue::glue("drake cache is set to {newCachePath}.\nIf you want other folder than \"/.temp\", reload the drake Rdata and run \ndrake$.updateCache(newCache=\"your_cache_folder_name\")")
+    )}
+  }
+}
+
+
