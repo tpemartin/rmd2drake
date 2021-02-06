@@ -325,6 +325,9 @@ drake_generateMakeplanFunction <- function(drake){
         ), targets
       )
 
+    drake$visualize <-
+      drake_generateVisFunction(drake)
+
     planBasename <-
       stringr::str_extract(basename(drake$activeRmd$filenames),"[^\\.]+")
     planname <- rlang::sym(glue::glue("plan_{planBasename}"))
@@ -369,6 +372,21 @@ drake_generateLoadCall <- function(drake, target){
 
   }
 
+}
+
+drake_generateVisFunction <- function(drake){
+  function(...){
+    planBasename <-
+      stringr::str_extract(basename(drake$activeRmd$filenames),"[^\\.]+")
+    planname <- rlang::sym(glue::glue("plan_{planBasename}"))
+    rlang::expr(
+      drake::vis_drake_graph(
+        !!planname,
+        cache=drake::drake_cache(path=!!drake$activeRmd$frontmatter$drake_cache))
+    ) -> exprVisDrake
+    eval(exprVisDrake, envir=drake$.planEnvironment)
+
+  }
 }
 
 updateCache <- function(drake){
