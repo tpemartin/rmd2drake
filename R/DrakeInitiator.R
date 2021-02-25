@@ -46,6 +46,8 @@ Drake <- function(){
   drake$process2get$planLegos <-
     drake_generatePlanLegos(drake)
 
+  drake$eval_makecondition <- eval_makecondition(drake = drake)
+
   drake$source_plan <- function(){
     planEnvironment <- new.env(parent = drake)
     # evaluate makecondition
@@ -325,6 +327,13 @@ drake_generateMakeplanFunction <- function(drake){
         ), targets
       )
 
+    drake$clipCommand <-
+      setNames(
+        purrr::map(
+          targets,
+          ~drake_generateClipCall(drake, .x)
+        ), targets
+      )
     drake$visualize <-
       drake_generateVisFunction(drake)
 
@@ -374,6 +383,13 @@ drake_generateLoadCall <- function(drake, target){
 
 }
 
+drake_generateClipCall <- function(drake, target){
+  function(){
+    clipr::write_clip(drake$process2get$codes$drakeTargetContent[[target]])
+  }
+
+}
+
 drake_generateVisFunction <- function(drake){
   function(...){
     planBasename <-
@@ -406,5 +422,10 @@ updateCache <- function(drake){
     )}
   }
 }
-
+eval_makecondition <- function(drake){
+  function(){
+    exprMakecondition <- parse(text=drake$process2get$codes$makecondition)
+    eval(exprMakecondition, envir = .GlobalEnv)
+  }
+}
 
