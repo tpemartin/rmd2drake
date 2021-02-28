@@ -1,7 +1,7 @@
 Drake <- function(){
   drake <- new.env()
   drake$activeRmd <- list()
-  rmd2drake:::extract_activeEditorFilename()
+  drake_extract_activeEditorFilename()
   drake$activeRmd$filenames <- .GlobalEnv$.activeFile
   drake$activeRmd$lines <-
     xfun::read_utf8(drake$activeRmd$filenames)
@@ -408,6 +408,10 @@ drake_generateVisFunction <- function(drake){
 updateCache <- function(drake){
   function (newCache = ".temp")
   {
+    assertthat::assert_that(
+      exists(".root"),
+      msg="There is no .root function to indicate your project root. Make sure you run RStudio inside a project, and run the following command:\n .root <- rprojroot::is_rstudio_project$make_fix_file()"
+    )
     # newCache = ".temp"
     newCachePath <- eval(parse(text=glue::glue("file.path(.root(),\"{newCache}\")")))
     storr_rdsOptions <- drake$process2get$storr_rdsOptions
@@ -426,6 +430,13 @@ eval_makecondition <- function(drake){
   function(){
     exprMakecondition <- parse(text=drake$process2get$codes$makecondition)
     eval(exprMakecondition, envir = .GlobalEnv)
+  }
+}
+drake_extract_activeEditorFilename <- function(){
+  activeSource <- rstudioapi::getSourceEditorContext()
+  .activeFile <<- activeSource$path
+  if(activeSource$path==''){
+    warning("Target Rmd file hasn't been saved yet. No path to it will be found. Please save your Rmd and try again")
   }
 }
 

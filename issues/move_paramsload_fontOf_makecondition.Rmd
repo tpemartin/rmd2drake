@@ -1,0 +1,6 @@
+---
+title: "move params loading to be front of makecondition"
+labels: ["improve"]
+---
+
+makecondition 常常要使用到params, 應將它移到makecondition 前
