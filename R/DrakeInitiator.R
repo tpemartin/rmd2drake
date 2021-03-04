@@ -337,6 +337,9 @@ drake_generateMakeplanFunction <- function(drake){
     drake$visualize <-
       drake_generateVisFunction(drake)
 
+    drake$.save2droppath <- drake_saveDrake2Dropbox
+    drake$.showAtFinder <- drake_openFinderAtDropPath
+
     planBasename <-
       stringr::str_extract(basename(drake$activeRmd$filenames),"[^\\.]+")
     planname <- rlang::sym(glue::glue("plan_{planBasename}"))
@@ -438,5 +441,34 @@ drake_extract_activeEditorFilename <- function(){
   if(activeSource$path==''){
     warning("Target Rmd file hasn't been saved yet. No path to it will be found. Please save your Rmd and try again")
   }
+}
+
+drake_saveDrake2Dropbox <- function(){
+  assertthat::assert_that(
+    exists("droppath"),
+    msg="There is no droppath in .Globalenv which defined where the Rdata of drake will be saved at."
+  )
+  filename <- rstudioapi::getSourceEditorContext()
+  savename <- stringr::str_replace(
+    filename$path, "\\.[:alpha:]+$","_drake.Rdata"
+  )
+  savename <-
+    file.path(
+      droppath,
+      basename(savename)
+    )
+
+  save(drake, file=savename)
+  message(
+    glue::glue("drake in .Globalenv is saved in \n{savename}")
+  )
+}
+
+drake_openFinderAtDropPath <- function(){
+  assertthat::assert_that(
+    exists("droppath"),
+    msg="There is no droppath in .Globalenv which defined where the Rdata of drake will be saved at."
+  )
+  system(glue::glue("open {.GlobalEnv$droppath}"))
 }
 
