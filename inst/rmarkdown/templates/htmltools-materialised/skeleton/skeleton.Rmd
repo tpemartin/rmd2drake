@@ -59,7 +59,7 @@ bodyTags <- {
 
 ## Dependencies (Optional)
 
-#### Materialized framework{-}
+Materialized framework{-}
 
 ```
 <!-- Compiled and minified CSS -->
@@ -70,6 +70,7 @@ bodyTags <- {
             
 ```
 
+### Define dependency
 
 ```{r mtl_dependencyGenerator}
 mtl_dependencyGenerator <- function() {
@@ -88,9 +89,8 @@ mtl_dependencyGenerator <- function() {
 ```
 
 
-### Attach dependency two ways
+### Attach dependency
 
-#### htmltools::tagList{-}
 
 ```{r html_materializedUsingTagList}
 html_materializedUsingTagList <- 
