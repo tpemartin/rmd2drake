@@ -1,0 +1,128 @@
+---
+drake_cache: ".myHtml"
+---
+
+# Materialized Framework
+
+```{r makecondition}
+library(dplyr)
+library(htmltools)
+```
+
+
+## HTML Structure
+
+```{r html_template_rightWay}
+html_template_rightWay <- tags$html(
+  tags$head(
+    do.call(htmltools::tagList, headTags),
+    tags$meta(
+      name="viewport",
+      content="width=device-width, initial-scale=1.0"
+    )
+  ),
+  tags$body(
+    do.call(htmltools::tagList, bodyTags)
+  )
+)
+```
+
+### Head Tags
+
+```{r headTags}
+headTags <- {
+  list(
+    htmltools::tags$link(
+      href="https://fonts.googleapis.com/icon?family=Material+Icons",
+      rel="stylesheet"
+    )
+  )
+}
+```
+
+### Body Tags
+
+```{r bodyTags}
+bodyTags <- {
+  list(
+    tags$div(class="container",
+             # Page Content goes here
+             tags$div(class="row",
+                      tags$div(class="col s12", "This div is 12-columns wide on all screen sizes"),
+                      tags$div(class="col s6", "6-columns (one-half)"),
+                      tags$div(class="col s6", "6-columns (one-half)"))
+             )
+  )
+}
+```
+
+
+## Dependencies (Optional)
+
+#### Materialized framework{-}
+
+```
+<!-- Compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+            
+```
+
+
+```{r mtl_dependencyGenerator}
+mtl_dependencyGenerator <- function() {
+  mtl_cdn <- "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/"
+  mtl_css <- "css/materialize.min.css"
+  mtl_js <- "js/materialize.min.js"
+  
+  htmltools::htmlDependency(
+    name = "mtl",
+    version = "1.0",
+    src = c(href = mtl_cdn),
+    stylesheet = mtl_css,
+    script = mtl_js
+  )
+}
+```
+
+
+### Attach dependency two ways
+
+#### htmltools::attachDependencies{-}
+
+```{r html_materializedUsingAttachDependencies}
+html_template_rightWay %>%
+  htmltools::attachDependencies(
+    mtl_dependencyGenerator(),
+    append = T
+  ) -> html_materializedUsingAttachDependencies
+```
+
+#### htmltools::tagList{-}
+
+```{r html_materializedUsingTagList}
+html_materializedUsingTagList <- 
+  htmltools::tagList(
+    html_template_rightWay,
+    mtl_dependencyGenerator()
+  )
+```
+
+
+```{r}
+htmltools::browsable(
+  html_materializedUsingTagList
+  )
+```
+
+
+## Save
+
+
+```{r save_html}
+htmltools::save_html(html_materializedUsingTagList,
+                     file="index.html")
+```
+
