@@ -12,8 +12,8 @@ library(htmltools)
 
 ## HTML Structure
 
-```{r html_template_rightWay}
-html_template_rightWay <- tags$html(
+```{r html_placeholder}
+html_placeholder <- tags$html(
   tags$head(
     do.call(htmltools::tagList, headTags),
     tags$meta(
@@ -44,7 +44,7 @@ headTags <- {
 
 ```{r bodyTags}
 bodyTags <- {
-  list(
+  htmltools::tagList(
     tags$div(class="container",
              # Page Content goes here
              tags$div(class="row",
@@ -92,10 +92,10 @@ mtl_dependencyGenerator <- function() {
 ### Attach dependency
 
 
-```{r html_materializedUsingTagList}
-html_materializedUsingTagList <- 
+```{r html_complete}
+html_complete <- 
   htmltools::tagList(
-    html_template_rightWay,
+    html_placeholder,
     mtl_dependencyGenerator()
   )
 ```
@@ -103,7 +103,7 @@ html_materializedUsingTagList <-
 
 ```{r}
 htmltools::browsable(
-  html_materializedUsingTagList
+  html_complete
   )
 ```
 
@@ -112,7 +112,7 @@ htmltools::browsable(
 
 
 ```{r save_html}
-htmltools::save_html(html_materializedUsingTagList,
+htmltools::save_html(html_complete,
                      file="index.html")
 ```
 
