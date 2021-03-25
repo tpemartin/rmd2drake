@@ -72,8 +72,8 @@ Materialized framework{-}
 
 ### Define dependency
 
-```{r mtl_dependencyGenerator}
-mtl_dependencyGenerator <- function() {
+```{r dependency_generator}
+dependency_generator <- function() {
   mtl_cdn <- "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/"
   mtl_css <- "css/materialize.min.css"
   mtl_js <- "js/materialize.min.js"
@@ -96,7 +96,7 @@ mtl_dependencyGenerator <- function() {
 html_complete <- 
   htmltools::tagList(
     html_placeholder,
-    mtl_dependencyGenerator()
+    dependency_generator()
   )
 ```
 
