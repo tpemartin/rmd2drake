@@ -90,16 +90,6 @@ mtl_dependencyGenerator <- function() {
 
 ### Attach dependency two ways
 
-#### htmltools::attachDependencies{-}
-
-```{r html_materializedUsingAttachDependencies}
-html_template_rightWay %>%
-  htmltools::attachDependencies(
-    mtl_dependencyGenerator(),
-    append = T
-  ) -> html_materializedUsingAttachDependencies
-```
-
 #### htmltools::tagList{-}
 
 ```{r html_materializedUsingTagList}
