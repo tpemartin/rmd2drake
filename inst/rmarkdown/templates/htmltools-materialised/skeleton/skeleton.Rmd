@@ -7,6 +7,8 @@ drake_cache: ".myHtml"
 ```{r makecondition}
 library(dplyr)
 library(htmltools)
+library(econR)
+web <- Web()
 ```
 
 
@@ -31,7 +33,7 @@ html_placeholder <- tags$html(
 
 ```{r headTags}
 headTags <- {
-  list(
+  htmltools::tagList(
     htmltools::tags$link(
       href="https://fonts.googleapis.com/icon?family=Material+Icons",
       rel="stylesheet"
@@ -57,35 +59,21 @@ bodyTags <- {
 ```
 
 
-## Dependencies (Optional)
+## Dependencies
 
-Materialized framework{-}
-
-```
-<!-- Compiled and minified CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-
-<!-- Compiled and minified JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-            
-```
 
 ### Define dependency
 
-```{r dependency_generator}
-dependency_generator <- function() {
-  mtl_cdn <- "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/"
-  mtl_css <- "css/materialize.min.css"
-  mtl_js <- "js/materialize.min.js"
-  
-  htmltools::htmlDependency(
-    name = "mtl",
-    version = "1.0",
-    src = c(href = mtl_cdn),
-    stylesheet = mtl_css,
-    script = mtl_js
-  )
-}
+```{r myDependency}
+myDependency <- htmltools::htmlDependency(
+  name="myown",
+  version="1.0",
+  src=c(filepath=.root()),
+  stylesheet = "css/mystyle.css",
+  script = "js/mydesign.js",
+  head = '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+TC">
+'
+)
 ```
 
 
@@ -96,7 +84,9 @@ dependency_generator <- function() {
 html_complete <- 
   htmltools::tagList(
     html_placeholder,
-    dependency_generator()
+    web$htmlDependencies$materialise(),
+    web$htmlDependencies$jquery(),
+    myDependency
   )
 ```
 
@@ -110,9 +100,16 @@ htmltools::browsable(
 
 ## Save
 
-
 ```{r save_html}
-htmltools::save_html(html_complete,
-                     file="index.html")
+drake::file_in("css/mystyle.css")
+drake::file_in("js/mydesign.js")
+htmltools::save_html(
+  html_complete, 
+  file = file.path(
+    web$output_path(),
+    "index.html"
+  ),
+  libdir="lib"
+)
 ```
 
