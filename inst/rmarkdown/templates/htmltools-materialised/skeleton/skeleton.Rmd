@@ -2,15 +2,42 @@
 drake_cache: ".myHtml"
 ---
 
-# Materialized Framework
+## Setup environment
+
+  * Mainly work on Body Tags
+  
+  * Initiate drake -> `drake$source_plan()` -> `drake$makePlan()`
+  
+  * `web$browse()` to see the output 
 
 ```{r makecondition}
 library(dplyr)
 library(htmltools)
 library(econR)
 web <- Web()
+web$foldername="docs2" # output folder name
+web$html_filename <- "index.html"
 ```
 
+### Body Tags
+
+```{r bodyTags}
+bodyTags <- {
+  htmltools::tagList(
+    tags$main(
+      tags$h5(class="center-align",
+      "〖Title〗")
+    ),
+    tags$div(class="container",
+             tags$div(class="row",
+                      tags$div(class="col s3",
+                        tags$h5(class="center-align", "〖sidebar panel〗")),
+                      tags$div(class="col s9",
+                        tags$h5(class="center-align", "〖graph/table pane〗"))
+             ))
+  )
+}
+```
 
 ## HTML Structure
 
@@ -29,6 +56,8 @@ html_placeholder <- tags$html(
 )
 ```
 
+## Dependencies
+
 ### Head Tags
 
 ```{r headTags}
@@ -42,33 +71,13 @@ headTags <- {
 }
 ```
 
-### Body Tags
-
-```{r bodyTags}
-bodyTags <- {
-  htmltools::tagList(
-    tags$div(class="container",
-             # Page Content goes here
-             tags$div(class="row",
-                      tags$div(class="col s12", "This div is 12-columns wide on all screen sizes"),
-                      tags$div(class="col s6", "6-columns (one-half)"),
-                      tags$div(class="col s6", "6-columns (one-half)"))
-             )
-  )
-}
-```
-
-
-## Dependencies
-
-
 ### Define dependency
 
 ```{r myDependency}
 myDependency <- htmltools::htmlDependency(
   name="myown",
   version="1.0",
-  src=c(filepath=.root()),
+  src=c(filepath=""),
   stylesheet = "css/mystyle.css",
   script = "js/mydesign.js",
   head = '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+TC">
@@ -101,15 +110,12 @@ htmltools::browsable(
 ## Save
 
 ```{r save_html}
-drake::file_in("css/mystyle.css")
-drake::file_in("js/mydesign.js")
 htmltools::save_html(
   html_complete, 
-  file = file.path(
-    web$output_path(),
-    "index.html"
-  ),
+  file = web$output_filepath(),
   libdir="lib"
 )
 ```
+
+
 
