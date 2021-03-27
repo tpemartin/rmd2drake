@@ -67,8 +67,14 @@ Drake <- function(){
   }
   drake$source_planExport <- drake_generatePlanExportFunction(drake)
 
+  drake$update <- function(){
+    Drake()
+    .GlobalEnv$drake$source_plan()
+    .GlobalEnv$drake$makePlan()
+  }
 
   drake$.updateCache <- updateCache(drake)
+
   # drake
   .GlobalEnv$drake <- drake
   invisible(drake)
