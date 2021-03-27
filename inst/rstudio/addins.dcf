@@ -1,33 +1,3 @@
-Name: Active Rmd->Drake Plan->Make
-Description: New Addin Description
-Binding: convert2drakeplanAndMake
-Interactive: false
-
-Name: Make active plan
-Description: New Addin Description
-Binding: mkActiveRmd_plan
-Interactive: false
-
-Name: Visualize active plan
-Description: New Addin Description
-Binding: visActiveRmd_plan
-Interactive: true
-
-Name: Clean target(s)/at cursor
-Description: New Addin Description
-Binding: rs_addin_clean
-Interactive: false
-
-Name: WebRmd -> Drake Plan -> Make
-Description: New Addin Description
-Binding: convertWebRmd2drakeplanAndMake
-Interactive: false
-
-Name: Active Drake R -> plan Rmd
-Description: New Addin Description
-Binding: produceRmdFromActiveRscript
-Interactive: false
-
 Name: Get .activeFile
 Description: New Addin Description
 Binding: extract_activeEditorFilename
@@ -39,10 +9,6 @@ Description: New Addin Description
 Binding: get_selection
 Interactive: false
 
-Name: Generate Drake Rmd from bookdown Rmd chapter
-Description: New Addin Description
-Binding: generate_drakeRmdFromActiveRmd
-Interactive: false
 
 Name: Initiate Drake
 Description: New Addin Description
