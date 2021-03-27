@@ -4,17 +4,19 @@ drake_cache: ".myHtml"
 
 ## Setup environment
 
-  * Mainly work on Body Tags
+  * Addins: Initiate drake -> `drake$source_plan()` -> `drake$makePlan()`.
   
-  * Initiate drake -> `drake$source_plan()` -> `drake$makePlan()`
+  * `web$browse()` to see the output. 
   
-  * `web$browse()` to see the output 
+  * If any change to Rmd, save the Rmd, then `drake$update()` -> `web$browser()` to see the change.
+  
+  * You html output are in `web$output_filepath()`.
 
 ```{r makecondition}
 library(dplyr)
 library(htmltools)
 library(econR)
-web <- Web()
+web <- econR::Web()
 web$foldername="docs2" # output folder name
 web$html_filename <- "index.html"
 ```
