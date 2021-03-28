@@ -16,9 +16,41 @@ drake_cache: ".myHtml"
 library(dplyr)
 library(htmltools)
 library(econR)
-web <- econR::Web()
+.GlobalEnv$web <- econR::Web()
 web$foldername="docs2" # output folder name
 web$html_filename <- "index.html"
+
+# Demo: htmlwidget embed
+if(!file.exists("plt_gg_bikeRouteStm.Rda")) xfun::download_file("https://www.dropbox.com/s/ify9h26c172t7t5/plt_gg_bikeRouteStm.Rda?dl=1", mode="wb")
+load("plt_gg_bikeRouteStm.Rda", envir = .GlobalEnv)
+
+```
+
+### Widgets
+
+
+```{r save_widget}
+save_widget = {
+  plotly::partial_bundle(plt_gg_bikeRouteStm) %>%
+    htmlwidgets::saveWidget(
+    file=
+      file.path(dirname(web$output_filepath()), "plt_gg_bikeRouteStm.html"),
+    selfcontained = FALSE,
+    libdir="lib"
+  )
+}
+```
+
+```{r iframe_widget}
+iframe_widget <- {
+  htmltools::tags$iframe(
+    width="853", height="480",
+    src = "plt_gg_bikeRouteStm.html",
+    scrolling = "no",
+    seamless = "seamless",
+    frameBorder = "0"
+  )
+}
 ```
 
 ### Body Tags
@@ -35,11 +67,14 @@ bodyTags <- {
                       tags$div(class="col s3",
                         tags$h5(class="center-align", "〖sidebar panel〗")),
                       tags$div(class="col s9",
-                        tags$h5(class="center-align", "〖graph/table pane〗"))
-             ))
+                               tags$div(class="video-container",
+                                        iframe_widget))
+                      ))
   )
 }
 ```
+
+  * `video-container` ensure the responsiveness of iframe embed.
 
 ## HTML Structure
 
@@ -87,6 +122,16 @@ myDependency <- htmltools::htmlDependency(
 )
 ```
 
+```{r local_jquery}
+local_jquery <- 
+  htmltools::htmlDependency(
+    name="jquery",
+    version="3.5.1",
+    src=c(href = "lib/jquery-3.5.1"),
+    # to use the same library here must use href, not filepath; otherwise, the current jquery system will be removed.
+    script = c("jquery.min.js")
+  )
+```
 
 ### Attach dependency
 
@@ -96,17 +141,12 @@ html_complete <-
   htmltools::tagList(
     html_placeholder,
     web$htmlDependencies$materialise(),
-    web$htmlDependencies$jquery(),
+    local_jquery, 
     myDependency
   )
 ```
 
-
-```{r}
-htmltools::browsable(
-  html_complete
-  )
-```
+  * If not using jquery from htmlwidgets, replace `local_jquery` with `web$htmlDependencies$jquery()`
 
 
 ## Save
@@ -117,6 +157,12 @@ htmltools::save_html(
   file = web$output_filepath(),
   libdir="lib"
 )
+```
+
+## Browse
+
+```{r}
+web$browse()
 ```
 
 
