@@ -10,7 +10,7 @@ drake_cache: ".myHtml"
   
   * If any change to Rmd, save the Rmd, then `drake$update()` -> `web$browser()` to see the change.
   
-  * You html output are in `web$output_filepath()`.
+  * Your html output file is in `web$output_filepath()`.
 
 ```{r makecondition}
 library(dplyr)
@@ -20,38 +20,23 @@ library(econR)
 web$foldername="docs2" # output folder name
 web$html_filename <- "index.html"
 
+```
+
+### Widgets
+
+  * Widgets can be designed in a separate file and saved in a Rdata for loading here.
+  
+  * While loading, make sure `envir = .GlobalEnv`.
+  
+  * Label widget loading chunk `makecondition_xxx`. 
+  
+```{r makecondition_widgets}
 # Demo: htmlwidget embed
 if(!file.exists("plt_gg_bikeRouteStm.Rda")) xfun::download_file("https://www.dropbox.com/s/ify9h26c172t7t5/plt_gg_bikeRouteStm.Rda?dl=1", mode="wb")
 load("plt_gg_bikeRouteStm.Rda", envir = .GlobalEnv)
 
 ```
 
-### Widgets
-
-
-```{r save_widget}
-save_widget = {
-  plotly::partial_bundle(plt_gg_bikeRouteStm) %>%
-    htmlwidgets::saveWidget(
-    file=
-      file.path(dirname(web$output_filepath()), "plt_gg_bikeRouteStm.html"),
-    selfcontained = FALSE,
-    libdir="lib"
-  )
-}
-```
-
-```{r iframe_widget}
-iframe_widget <- {
-  htmltools::tags$iframe(
-    width="853", height="480",
-    src = "plt_gg_bikeRouteStm.html",
-    scrolling = "no",
-    seamless = "seamless",
-    frameBorder = "0"
-  )
-}
-```
 
 ### Body Tags
 
@@ -67,14 +52,12 @@ bodyTags <- {
                       tags$div(class="col s3",
                         tags$h5(class="center-align", "〖sidebar panel〗")),
                       tags$div(class="col s9",
-                               tags$div(class="video-container",
-                                        iframe_widget))
+                               plt_gg_bikeRouteStm)
                       ))
   )
 }
 ```
 
-  * `video-container` ensure the responsiveness of iframe embed.
 
 ## HTML Structure
 
