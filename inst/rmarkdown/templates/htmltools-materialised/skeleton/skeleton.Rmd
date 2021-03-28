@@ -114,13 +114,16 @@ headTags <- {
 myDependency <- htmltools::htmlDependency(
   name="myown",
   version="1.0",
-  src=c(filepath=""),
+  src=c(filepath=web$cssJsPath),
   stylesheet = "css/mystyle.css",
   script = "js/mydesign.js",
   head = '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+TC">
 '
 )
 ```
+
+  * If src is in other path, use `web$config_cssJsPath("your_path")` in **makecondition** -- no need to change `web$cssJsPath` (it will change accordingly).
+
 
 ```{r local_jquery}
 local_jquery <- 
