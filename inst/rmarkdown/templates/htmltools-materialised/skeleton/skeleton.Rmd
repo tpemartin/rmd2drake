@@ -35,10 +35,16 @@ web$html_filename <- "index.html"
   * Label widget loading chunk `makecondition_xxx`. 
   
 ```{r makecondition_widgets}
-# Demo: htmlwidget embed
-if(!file.exists("plt_gg_bikeRouteStm.Rda")) xfun::download_file("https://www.dropbox.com/s/ify9h26c172t7t5/plt_gg_bikeRouteStm.Rda?dl=1", mode="wb")
-load("plt_gg_bikeRouteStm.Rda", envir = .GlobalEnv)
+library(plotly)
+```
 
+
+```{r plt_widget}
+plt_widget <- subplot(
+  plot_ly(mpg, x = ~cty, y = ~hwy, name = "default"),
+  plot_ly(mpg, x = ~cty, y = ~hwy) %>% 
+    add_markers(alpha = 0.2, name = "alpha")
+)
 ```
 
 
@@ -49,14 +55,12 @@ bodyTags <- {
   htmltools::tagList(
     tags$main(
       tags$h5(class="center-align",
-      "〖Title〗")
+      "Materialise with Plotly")
     ),
     tags$div(class="container",
              tags$div(class="row",
-                      tags$div(class="col s3",
-                        tags$h5(class="center-align", "〖sidebar panel〗")),
-                      tags$div(class="col s9",
-                               plt_gg_bikeRouteStm)
+                      tags$div(class="col s12",
+                               plt_widget)
                       ))
   )
 }
