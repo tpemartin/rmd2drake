@@ -2,6 +2,8 @@ Drake <- function(){
   drake <- new.env()
   drake$activeRmd <- list()
   drake_extract_activeEditorFilename()
+
+  # drake$activeRmd$filenames <- .activeFile
   drake$activeRmd$filenames <- .GlobalEnv$.activeFile
   drake$activeRmd$lines <-
     xfun::read_utf8(drake$activeRmd$filenames)
@@ -19,12 +21,12 @@ Drake <- function(){
   drake$process2get$codes <- {
 
 
-    what2pick <- c("makecondition", "drake=F", "r", "[^r\\=]+")
+    what2pick <- c("makecondition", "drake[\\s]*=[\\s]*F", "r", "[^r\\=]+")
     picks <- drake_generatePicks(drake$activeRmd$autopsy$head_info,
                                  what2pick)
     makeconditions = {
       targetContents <-
-        drake$activeRmd$autopsy$content[picks$makecondition & !picks$`drake=F` & picks$r]
+        drake$activeRmd$autopsy$content[picks$makecondition & !picks[["drake[\\s]*=[\\s]*F"]] & picks$r]
       drake_extractCodes(targetContents)
     }
     drakeTargetContents = drake_extraceTargetContents(drake, picks)
@@ -93,10 +95,13 @@ drake_get_rmdlinesTable <- function(rmdlines){
   oddIndices <- seq(from=1, to=length(whichStartsWith3Ticks), by=2)
   whichStartsWith3Ticks_odd <- whichStartsWith3Ticks[oddIndices]
 
-  stringr::str_extract_all(
-    rmdlines[whichStartsWith3Ticks_odd],
-    "\\b[0-9a-zA-Z\\=_\\.]+\\b"
-  ) -> whatAreChunkEngine_Labels_Options
+  # stringr::str_extract_all(
+  #   rmdlines[whichStartsWith3Ticks_odd],
+  #   "\\b[0-9a-zA-Z\\=_\\.]+\\b"
+  # )
+  drake_dissect_chunkHeaders(
+    rmdlines[whichStartsWith3Ticks_odd]
+  )-> whatAreChunkEngine_Labels_Options
 
   tibble::tibble(
     start=whichStartsWith3Ticks_odd,
@@ -164,7 +169,7 @@ drake_generatePicks <- function(list_chr, what2pick){
 }
 drake_extraceTargetContents <- function(drake, picks){
   whichIsR_labelled_noDrakeF_notMakecondition <-
-    which(picks[["[^r\\=]+"]] & picks$r & !picks$makecondition & !picks$`drake=F`)
+    which(picks[["[^r\\=]+"]] & picks$r & !picks$makecondition & !picks[["drake[\\s]*=[\\s]*F"]])
   purrr::map(
     seq_along(whichIsR_labelled_noDrakeF_notMakecondition),
     ~{
@@ -478,3 +483,22 @@ drake_openFinderAtDropPath <- function(){
   system(glue::glue("open {.GlobalEnv$droppath}"))
 }
 
+drake_dissect_chunkHeaderX <- function(chunkHeaderX){
+  require(dplyr)
+  stringr::str_extract(
+    chunkHeaderX, "(?<=(```\\{))[:alpha:]*"
+  ) -> languageEngines
+  stringr::str_remove_all(
+    chunkHeaderX, "(```\\{\\s*[:alpha:]*|\\}|\\s*)"
+  ) %>%
+    stringr::str_split(",\\s*") -> chunkHeaderX_nonLangPart
+  c(languageEngines, unlist(chunkHeaderX_nonLangPart)) -> output
+  output[output!=""] -> output
+  return(output)
+}
+drake_dissect_chunkHeaders <- function(chunkHeaders){
+  purrr::map(
+    chunkHeaders,
+    drake_dissect_chunkHeaderX
+  )
+}
