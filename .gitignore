@@ -67,3 +67,6 @@ drake_plan_annotationmaps.R
 drake_plan_drake_03_dateTime.R
 flexboxVideo.Rmd
 img/gg_worldXMGDPRatio.svg
+inst/rmarkdown/templates/html-one-page/skeleton/.myHtml/
+inst/rmarkdown/templates/html-one-page/skeleton/.myHtml/
+inst/rmarkdown/templates/html-one-page/skeleton/.myHtml/
