@@ -21,12 +21,12 @@ Drake <- function(){
   drake$process2get$codes <- {
 
 
-    what2pick <- c("makecondition", "drake[\\s]*=[\\s]*F", "r", "[^r\\=]+")
+    what2pick <- c("makecondition", "drake[\\s]*=[\\s]*F", "\\br\\b", "[^r\\=]+")
     picks <- drake_generatePicks(drake$activeRmd$autopsy$head_info,
                                  what2pick)
     makeconditions = {
       targetContents <-
-        drake$activeRmd$autopsy$content[picks$makecondition & !picks[["drake[\\s]*=[\\s]*F"]] & picks$r]
+        drake$activeRmd$autopsy$content[picks$makecondition & !picks[["drake[\\s]*=[\\s]*F"]] & picks[["\\br\\b"]]]
       drake_extractCodes(targetContents)
     }
     drakeTargetContents = drake_extraceTargetContents(drake, picks)
@@ -71,6 +71,8 @@ Drake <- function(){
 
   drake$update <- function(){
     Drake()
+    activeFile <- rstudioapi::getSourceEditorContext()
+    rstudioapi::documentSave(id=activeFile$id)
     .GlobalEnv$drake$source_plan()
     .GlobalEnv$drake$makePlan()
   }
@@ -168,8 +170,9 @@ drake_generatePicks <- function(list_chr, what2pick){
   return(picks)
 }
 drake_extraceTargetContents <- function(drake, picks){
+  # browser()
   whichIsR_labelled_noDrakeF_notMakecondition <-
-    which(picks[["[^r\\=]+"]] & picks$r & !picks$makecondition & !picks[["drake[\\s]*=[\\s]*F"]])
+    which(picks[["[^r\\=]+"]] & picks[["\\br\\b"]] & !picks$makecondition & !picks[["drake[\\s]*=[\\s]*F"]])
   purrr::map(
     seq_along(whichIsR_labelled_noDrakeF_notMakecondition),
     ~{
