@@ -4,7 +4,7 @@ drake_cache: ".myHtml"
 
 ## Materialise Framework
 
-  * <https://materializecss.com/>
+  * <https://materializecss.github.io/materialize/>
 
 ## Setup environment
 
@@ -12,7 +12,7 @@ drake_cache: ".myHtml"
   
   * `web$browse()` to see the output. 
   
-  * If any change to Rmd, save the Rmd, then `drake$update()` -> `web$browser()` to see the change.
+  * If any change to Rmd or js/ and css/ folder, then `web$update()` -> `web$browse()` to see the change.
   
   * Your html output file is in `web$output_filepath()`.
 
@@ -27,12 +27,6 @@ web$html_filename <- "index.html"
 ```
 
 ### Widgets
-
-  * Widgets can be designed in a separate file and saved in a Rdata for loading here.
-  
-  * While loading, make sure `envir = .GlobalEnv`.
-  
-  * Label widget loading chunk `makecondition_xxx`. 
   
 ```{r makecondition_widgets}
 library(plotly)
