@@ -282,6 +282,9 @@ drake_generatePlanLegos <- function(drake) {
   planBasename <-
     stringr::str_extract(basename(drake$activeRmd$filenames),"[^\\.]+")
 
+  stringr::str_replace(
+    planBasename, "[:punct:]", "_"
+  ) -> planBasename
   unlist(
     c(glue::glue("plan_{planBasename} <- "),
       "drake::drake_plan(",
@@ -303,6 +306,9 @@ drake_generatePlanExportFunction <- function(drake){
         basename(drake$activeRmd$filenames),
         "[^\\.]+"
       )
+      stringr::str_replace(
+        planBasename, "[:punct:]", "_"
+      ) -> planBasename
       filename <- file.path(
         dirname(drake$activeRmd$filenames),
         paste0("drake_plan_",planBasename,".R"))
@@ -356,6 +362,9 @@ drake_generateMakeplanFunction <- function(drake){
 
     planBasename <-
       stringr::str_extract(basename(drake$activeRmd$filenames),"[^\\.]+")
+    stringr::str_replace(
+      planBasename, "[:punct:]", "_"
+    ) -> planBasename
     planname <- rlang::sym(glue::glue("plan_{planBasename}"))
     rlang::expr(
       drake::make(
@@ -371,6 +380,9 @@ drake_generateLoadFunction <- function(drake){
   function(...){
     planBasename <-
       stringr::str_extract(basename(drake$activeRmd$filenames),"[^\\.]+")
+    stringr::str_replace(
+      planBasename, "[:punct:]", "_"
+    ) -> planBasename
     planname <- rlang::sym(glue::glue("plan_{planBasename}"))
     group_vars <- rlang::enquos(...)
     rlang::expr(
@@ -411,6 +423,9 @@ drake_generateVisFunction <- function(drake){
   function(...){
     planBasename <-
       stringr::str_extract(basename(drake$activeRmd$filenames),"[^\\.]+")
+    stringr::str_replace(
+      planBasename, "[:punct:]", "_"
+    ) -> planBasename
     planname <- rlang::sym(glue::glue("plan_{planBasename}"))
     rlang::expr(
       drake::vis_drake_graph(
