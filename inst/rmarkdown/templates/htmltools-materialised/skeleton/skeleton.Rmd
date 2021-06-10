@@ -21,10 +21,12 @@ library(dplyr)
 library(htmltools)
 library(econR)
 .GlobalEnv$web <- econR::Web()
-web$foldername="docs2" # output folder name
+web$foldername="www" # output folder name
 web$html_filename <- "index.html"
 
 ```
+
+## =======================
 
 ### Widgets
   
@@ -41,6 +43,7 @@ plt_widget <- subplot(
 )
 ```
 
+## =======================
 
 ### Body Tags
 
@@ -60,11 +63,12 @@ bodyTags <- {
 }
 ```
 
+## =======================
 
 ## HTML Structure
 
 ```{r html_placeholder}
-html_placeholder <- tags$html(
+html_placeholder <- tagList(
   tags$head(
     do.call(htmltools::tagList, headTags),
     tags$meta(
@@ -77,6 +81,7 @@ html_placeholder <- tags$html(
   )
 )
 ```
+
 
 ## Dependencies
 
@@ -103,7 +108,8 @@ myDependency <- htmltools::htmlDependency(
   stylesheet = "css/mystyle.css",
   script = "js/mydesign.js",
   head = '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+TC">
-'
+',
+  all_files = F
 )
 ```
 
@@ -136,6 +142,7 @@ html_complete <-
 
   * If not using jquery from htmlwidgets, replace `local_jquery` with `web$htmlDependencies$jquery()`
 
+## =======================
 
 ## Save
 
@@ -153,5 +160,11 @@ htmltools::save_html(
 web$browse()
 ```
 
+
+
+## JS
+
+
+<!--JS end-->
 
 

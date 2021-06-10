@@ -1,0 +1,84 @@
+---
+drake_cache: ".ui"
+---
+
+
+```{r makecondition}
+library(dplyr)
+library(shiny)
+library(htmltools)
+library(econR)
+.GlobalEnv$web <- econR::Web()
+web$foldername="www" # output folder name
+web$html_filename <- "index.html"
+
+```
+
+## =======================
+
+### Input
+
+```{r input_bins}
+sliderInput("bins",
+                        "Number of bins:",
+                        min = 1,
+                        max = 50,
+                        value = 30)
+```
+
+### Output
+
+```{r output_distPlot}
+output_distPlot <- shiny::plotOutput("distPlot")
+```
+
+## =======================
+
+### UI
+
+```{r ui}
+ui <- tags$body(
+  fluidPage(
+
+    # Application title
+    titlePanel("UI from ui.Rmd: Old Faithful Geyser Data"),
+
+    # Sidebar with a slider input for number of bins 
+    sidebarLayout(
+        sidebarPanel(
+            input_bins
+        ),
+
+        # Show a plot of the generated distribution
+        mainPanel(
+           output_distPlot
+        )
+    )
+))
+```
+
+
+
+## =======================
+
+## Save
+
+```{r save_ui}
+.root <- rprojroot::is_rstudio_project$make_fix_file()
+saveRDS(ui, file=file.path(.root(),"ui.RDS"))
+```
+
+## Browse
+
+```{r}
+web$browse()
+```
+
+
+
+
+
+## JS
+
+
+<!--JS end-->

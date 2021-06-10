@@ -1,0 +1,33 @@
+---
+drake_cache: ".server"
+---
+
+```{r makecondition}
+library(shiny)
+library(ggplot2)
+```
+
+## Input 
+
+```{r makecondition_input}
+input_bins = 30
+
+```
+
+## Output rendering
+
+```{r render_distPlot}
+render_distPlot <- shiny::renderPlot
+```
+
+```{r output_distPlot}
+output_distPlot <-  {
+    ggplot(data=faithful) +
+      geom_histogram(
+        aes(x=eruptions), bins=as.numeric(input_bins)
+      )
+
+}
+
+```
+

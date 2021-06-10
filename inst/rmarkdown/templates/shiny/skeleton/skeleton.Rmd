@@ -1,0 +1,18 @@
+
+In rmd/
+
+## server.Rmd
+
+  * `input_inputId`
+  
+  * `output_outputId` with `render_outputId`
+  
+  * Addins > Create server.R
+  
+## ui.Rmd
+
+  * Addins > Create ui.Rds
+  
+## Run app
+
+  * Open `ui.R` or `server.R` click **run app**
