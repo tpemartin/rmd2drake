@@ -1,5 +1,5 @@
 Drake <- function(){
-  drake <- new.env()
+  drake <- new.env(parent = .GlobalEnv)
   drake$activeRmd <- list()
   drake_extract_activeEditorFilename()
 
