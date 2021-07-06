@@ -107,7 +107,7 @@ drake_get_rmdlinesTable <- function(rmdlines){
 
   tibble::tibble(
     start=whichStartsWith3Ticks_odd,
-    end=seq(2, length(whichStartsWith3Ticks), by=2),
+    end=whichStartsWith3Ticks[seq(2, length(whichStartsWith3Ticks), by=2)],
     engine_label_option=whatAreChunkEngine_Labels_Options,
     content=rmdlines[whichStartsWith3Ticks_odd]
   )
