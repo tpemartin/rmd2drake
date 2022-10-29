@@ -54,8 +54,10 @@ Drake <- function(){
     planEnvironment <- new.env(parent = drake)
     # evaluate makecondition
     if(!is.null(drake$process2get$codes$makecondition)){
-      eval(parse(text=drake$process2get$codes$makecondition),
-         envir = planEnvironment)
+      # eval(parse(text=drake$process2get$codes$makecondition),
+      #    envir = planEnvironment)
+
+      str_eval(drake$process2get$codes$makecondition, env = planEnvironment)
     }
     # evaluate storr_rds options
     eval(parse(text=drake$process2get$storr_rdsOptions),

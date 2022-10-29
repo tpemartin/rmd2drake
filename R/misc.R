@@ -38,4 +38,14 @@ rootadjustPath <- function(path){
   }
   return(file.path(x,y))
 }
+str_eval <- function(txt, env = .GlobalEnv){
+  txt |>
+    paste(collapse = "\n") |>
+    rlang::parse_exprs() -> expr_makecondition
 
+  expr_makecondition |>
+    purrr::walk(
+      rlang::eval_bare,
+      env = env
+    )
+}
